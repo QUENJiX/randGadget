@@ -56,7 +56,7 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Admin route guard — check role in profiles table
+  // Admin route guard — check role via app_metadata (embedded in JWT, no DB query needed)
   const isAdmin = adminPaths.some(
     (p) => pathname === p || pathname.startsWith(p + '/')
   )
@@ -67,15 +67,24 @@ export async function updateSession(request: NextRequest) {
       redirectUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(redirectUrl)
     }
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    if (!profile || profile.role !== 'admin') {
-      const redirectUrl = request.nextUrl.clone()
-      redirectUrl.pathname = '/'
-      return NextResponse.redirect(redirectUrl)
+
+    // Primary check: app_metadata.role (set via Supabase Dashboard or SQL)
+    const role = user.app_metadata?.role
+
+    // Fallback: query profiles table if app_metadata doesn't have role yet
+    if (role !== 'admin') {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (error || !profile || profile.role !== 'admin') {
+        console.warn('[admin-guard] Access denied for user', user.id, '– role:', profile?.role, 'error:', error?.message)
+        const redirectUrl = request.nextUrl.clone()
+        redirectUrl.pathname = '/'
+        return NextResponse.redirect(redirectUrl)
+      }
     }
   }
 
