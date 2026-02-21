@@ -1,49 +1,32 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import type { Product } from '@/lib/types'
-
-// Mock featured products — replace with Supabase query
-const featuredProducts: Partial<Product>[] = [
-  {
-    id: '1',
-    name: 'iPhone 16 Pro Max',
-    slug: 'iphone-16-pro-max',
-    price: 189999,
-    compare_price: 199999,
-    short_desc: 'Titanium. A18 Pro. 48MP Fusion camera. The most advanced iPhone.',
-    tags: ['5G', 'A18 Pro', '48MP'],
-    brand: { id: 1, name: 'Apple', slug: 'apple', logo_url: null },
-  },
-  {
-    id: '2',
-    name: 'Samsung Galaxy S25 Ultra',
-    slug: 'samsung-galaxy-s25-ultra',
-    price: 164999,
-    compare_price: 174999,
-    short_desc: 'Galaxy AI built in. 200MP camera. S Pen included.',
-    tags: ['Galaxy AI', 'Snapdragon 8 Elite', '200MP'],
-    brand: { id: 2, name: 'Samsung', slug: 'samsung', logo_url: null },
-  },
-  {
-    id: '3',
-    name: 'MacBook Air 15" M3',
-    slug: 'macbook-air-15-m3',
-    price: 179999,
-    compare_price: null,
-    short_desc: 'Strikingly thin. Impressively big. M3 chip with 18-hour battery.',
-    tags: ['M3 Chip', '18hr Battery', 'Liquid Retina'],
-    brand: { id: 1, name: 'Apple', slug: 'apple', logo_url: null },
-  },
-]
 
 export function FeaturedShowcase() {
   const sectionRef = useRef<HTMLDivElement>(null)
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+
+  useEffect(() => {
+    const supabase = createClient()
+    if (!supabase) return
+    supabase
+      .from('products')
+      .select('*, brand:brands(*), category:categories(*), images:product_images(*)')
+      .eq('is_featured', true)
+      .eq('is_active', true)
+      .limit(3)
+      .then(({ data }: { data: any }) => {
+        if (data) setFeaturedProducts(data as Product[])
+      })
+  }, [])
 
   return (
     <section ref={sectionRef} className="py-20 md:py-28 bg-[var(--color-bg-alt)]">
@@ -84,7 +67,7 @@ export function FeaturedShowcase() {
           {featuredProducts.map((product, index) => (
             <FeaturedProductRow
               key={product.id}
-              product={product as Product}
+              product={product}
               index={index}
               reversed={index % 2 === 1}
             />
@@ -143,27 +126,34 @@ function FeaturedProductRow({
         <div className="relative md:w-1/2 aspect-[4/3] md:aspect-auto bg-[var(--color-surface)]/50 overflow-hidden">
           <motion.div
             style={{ y: imageY }}
-            className="absolute inset-0 flex items-center justify-center"
+            className="absolute inset-0"
           >
-            <div className="text-center">
-              <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-3xl bg-[var(--color-surface)] flex items-center justify-center shadow-inner">
-                <svg
-                  width="64"
-                  height="64"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1"
-                  className="text-[var(--color-text-tertiary)]/50"
-                >
-                  <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                  <line x1="12" y1="18" x2="12.01" y2="18" />
-                </svg>
-              </div>
-              <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">
-                {product.brand?.name}
-              </p>
-            </div>
+            {(() => {
+              const src = productImageUrl(product)
+              return src ? (
+                <Image
+                  src={src}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-3xl bg-[var(--color-surface)] flex items-center justify-center shadow-inner">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-[var(--color-text-tertiary)]/50">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                        <line x1="12" y1="18" x2="12.01" y2="18" />
+                      </svg>
+                    </div>
+                    <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">{product.brand?.name}</p>
+                  </div>
+                </div>
+              )
+            })()}
           </motion.div>
         </div>
 

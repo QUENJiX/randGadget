@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import {
   MapPin,
   CreditCard,
@@ -12,33 +14,10 @@ import {
   ArrowLeft,
 } from 'lucide-react'
 import { useCartStore, useCheckoutStore } from '@/lib/store'
-import { formatPrice, paymentMethodLabels } from '@/lib/utils'
+import { formatPrice, paymentMethodLabels, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
-import type { Division, District, Upazila, PaymentMethod } from '@/lib/types'
-
-// Mock data for geography — replace with Supabase queries
-const mockDivisions: Division[] = [
-  { id: 1, name: 'Dhaka', bn_name: 'ঢাকা' },
-  { id: 2, name: 'Chattogram', bn_name: 'চট্টগ্রাম' },
-  { id: 3, name: 'Rajshahi', bn_name: 'রাজশাহী' },
-  { id: 4, name: 'Khulna', bn_name: 'খুলনা' },
-  { id: 5, name: 'Barishal', bn_name: 'বরিশাল' },
-  { id: 6, name: 'Sylhet', bn_name: 'সিলেট' },
-  { id: 7, name: 'Rangpur', bn_name: 'রংপুর' },
-  { id: 8, name: 'Mymensingh', bn_name: 'ময়মনসিংহ' },
-]
-
-const mockDistricts: Record<number, District[]> = {
-  1: [
-    { id: 1, division_id: 1, name: 'Dhaka', bn_name: 'ঢাকা' },
-    { id: 2, division_id: 1, name: 'Gazipur', bn_name: 'গাজীপুর' },
-    { id: 3, division_id: 1, name: 'Narayanganj', bn_name: 'নারায়ণগঞ্জ' },
-  ],
-  2: [
-    { id: 4, division_id: 2, name: 'Chattogram', bn_name: 'চট্টগ্রাম' },
-    { id: 5, division_id: 2, name: "Cox's Bazar", bn_name: "কক্সবাজার" },
-  ],
-}
+import { createClient } from '@/lib/supabase/client'
+import type { Division, District, Upazila, DeliveryZone, PaymentMethod } from '@/lib/types'
 
 const steps = [
   { id: 'address' as const, label: 'Address', icon: MapPin },
@@ -47,43 +26,97 @@ const steps = [
 ]
 
 const paymentOptions: { method: PaymentMethod; label: string; description: string }[] = [
-  { method: 'cod', label: 'Cash on Delivery', description: 'Pay when your order arrives' },
+  { method: 'cod', label: 'Cash on Delivery', description: 'Pay when your order arrives · ৳20 COD fee' },
   { method: 'bkash', label: 'bKash', description: 'Pay securely with bKash mobile wallet' },
   { method: 'nagad', label: 'Nagad', description: 'Pay with your Nagad account' },
   { method: 'rocket', label: 'Rocket', description: 'Pay via DBBL Rocket' },
   { method: 'sslcommerz', label: 'Card / Net Banking', description: 'Visa, Mastercard, or internet banking via SSLCommerz' },
 ]
 
+const COD_FEE = 20
+
 export function CheckoutFlow() {
   const { step, address, paymentMethod, deliveryCharge, setStep, setAddress, setPaymentMethod, setDeliveryCharge } = useCheckoutStore()
   const cartItems = useCartStore((s) => s.items)
   const getSubtotal = useCartStore((s) => s.getSubtotal)
+  const clearCart = useCartStore((s) => s.clearCart)
+  const resetCheckout = useCheckoutStore((s) => s.reset)
+  const router = useRouter()
 
+  const [divisions, setDivisions] = useState<Division[]>([])
   const [districts, setDistricts] = useState<District[]>([])
+  const [upazilas, setUpazilas] = useState<Upazila[]>([])
+  const [deliveryZone, setDeliveryZone] = useState<DeliveryZone | null>(null)
+  const [orderLoading, setOrderLoading] = useState(false)
+  const [orderError, setOrderError] = useState<string | null>(null)
   const subtotal = getSubtotal()
-  const total = subtotal + deliveryCharge
+  const codFee = paymentMethod === 'cod' ? COD_FEE : 0
+  const total = subtotal + deliveryCharge + codFee
+
+  // Load divisions on mount
+  useEffect(() => {
+    const supabase = createClient()
+    if (!supabase) return
+    supabase.from('divisions').select('*').order('name').then(({ data }: { data: Division[] | null }) => {
+      if (data) setDivisions(data)
+    })
+  }, [])
 
   // Load districts when division changes
   useEffect(() => {
-    if (address.division_id) {
-      setDistricts(mockDistricts[address.division_id] || [])
-      setAddress({ district_id: null, upazila_id: null })
-    }
+    if (!address.division_id) { setDistricts([]); return }
+    const supabase = createClient()
+    if (!supabase) return
+    supabase
+      .from('districts')
+      .select('*')
+      .eq('division_id', address.division_id)
+      .order('name')
+      .then(({ data }: { data: District[] | null }) => {
+        if (data) setDistricts(data)
+      })
+    setAddress({ district_id: null, upazila_id: null })
+    setUpazilas([])
+    setDeliveryZone(null)
   }, [address.division_id])
 
-  // Calculate delivery charge based on division
+  // Load upazilas when district changes
   useEffect(() => {
-    if (address.division_id === 1) {
-      // Dhaka division
-      if (address.district_id === 1) {
-        setDeliveryCharge(subtotal >= 5000 ? 0 : 60) // Inside Dhaka
-      } else {
-        setDeliveryCharge(80) // Dhaka suburb
-      }
-    } else if (address.division_id) {
-      setDeliveryCharge(120) // Outside Dhaka
-    }
-  }, [address.division_id, address.district_id, subtotal])
+    if (!address.district_id) { setUpazilas([]); return }
+    const supabase = createClient()
+    if (!supabase) return
+    supabase
+      .from('upazilas')
+      .select('*')
+      .eq('district_id', address.district_id)
+      .order('name')
+      .then(({ data }: { data: Upazila[] | null }) => {
+        if (data) setUpazilas(data)
+      })
+    setAddress({ upazila_id: null })
+    setDeliveryZone(null)
+  }, [address.district_id])
+
+  // Look up delivery zone when upazila changes
+  useEffect(() => {
+    if (!address.upazila_id) { setDeliveryZone(null); setDeliveryCharge(0); return }
+    const supabase = createClient()
+    if (!supabase) return
+    supabase
+      .from('upazila_zone_map')
+      .select('delivery_zone_id, delivery_zones(*)')
+      .eq('upazila_id', address.upazila_id)
+      .single()
+      .then(({ data }: { data: any }) => {
+        if (data?.delivery_zones) {
+          const zone = data.delivery_zones as unknown as DeliveryZone
+          setDeliveryZone(zone)
+          // Free delivery for Inside Dhaka on orders ≥ ৳5,000
+          const charge = zone.name === 'Inside Dhaka' && subtotal >= 5000 ? 0 : zone.base_charge
+          setDeliveryCharge(charge)
+        }
+      })
+  }, [address.upazila_id, subtotal])
 
   const canAdvance = () => {
     if (step === 'address') {
@@ -100,6 +133,49 @@ export function CheckoutFlow() {
   const prevStep = () => {
     if (step === 'payment') setStep('address')
     else if (step === 'review') setStep('payment')
+  }
+
+  const handlePlaceOrder = async () => {
+    setOrderLoading(true)
+    setOrderError(null)
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cartItems.map((item) => ({
+            product_id: item.product_id,
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+          })),
+          address,
+          payment_method: paymentMethod,
+          delivery_charge: deliveryCharge,
+          cod_fee: codFee,
+          delivery_zone_id: deliveryZone?.id || null,
+          notes: '',
+          guest_phone: address.phone,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setOrderError(data.error || 'Something went wrong. Please try again.')
+        setOrderLoading(false)
+        return
+      }
+
+      // Success — clear cart and redirect to confirmation
+      clearCart()
+      resetCheckout()
+      router.push(`/order/${data.order_id}`)
+    } catch {
+      setOrderError('Network error. Please check your connection and try again.')
+    } finally {
+      setOrderLoading(false)
+    }
   }
 
   return (
@@ -196,7 +272,7 @@ export function CheckoutFlow() {
                         className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                       >
                         <option value="">Select Division</option>
-                        {mockDivisions.map((d) => (
+                        {divisions.map((d) => (
                           <option key={d.id} value={d.id}>
                             {d.name} ({d.bn_name})
                           </option>
@@ -223,6 +299,28 @@ export function CheckoutFlow() {
                         ))}
                       </select>
                     </div>
+                  </div>
+
+                  {/* Upazila */}
+                  <div className="max-w-sm">
+                    <label className="block text-sm font-medium mb-1.5">
+                      Upazila / Thana
+                    </label>
+                    <select
+                      value={address.upazila_id || ''}
+                      onChange={(e) =>
+                        setAddress({ upazila_id: Number(e.target.value) || null })
+                      }
+                      disabled={!address.district_id}
+                      className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors disabled:opacity-50"
+                    >
+                      <option value="">Select Upazila</option>
+                      {upazilas.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Street address */}
@@ -254,7 +352,7 @@ export function CheckoutFlow() {
                   </div>
 
                   {/* Delivery zone indicator */}
-                  {address.division_id && (
+                  {deliveryZone && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -263,20 +361,12 @@ export function CheckoutFlow() {
                       <Truck className="w-5 h-5 text-[var(--color-text-secondary)]" />
                       <div>
                         <p className="text-sm font-medium">
-                          {address.division_id === 1 && address.district_id === 1
-                            ? 'Inside Dhaka'
-                            : address.division_id === 1
-                            ? 'Dhaka Suburb'
-                            : 'Outside Dhaka'}
+                          {deliveryZone.name}
                         </p>
                         <p className="text-xs text-[var(--color-text-secondary)]">
                           Delivery charge: {deliveryCharge === 0 ? 'Free' : formatPrice(deliveryCharge)}
                           {' · '}
-                          {address.division_id === 1 && address.district_id === 1
-                            ? 'Est. 1 business day'
-                            : address.division_id === 1
-                            ? 'Est. 2 business days'
-                            : 'Est. 3-5 business days'}
+                          Est. {deliveryZone.est_days} business day{deliveryZone.est_days > 1 ? 's' : ''}
                         </p>
                       </div>
                     </motion.div>
@@ -388,10 +478,23 @@ export function CheckoutFlow() {
                         key={`${item.product_id}-${item.variant_id}`}
                         className="flex items-center gap-4"
                       >
-                        <div className="w-14 h-14 bg-[var(--color-surface)] rounded-lg shrink-0 flex items-center justify-center">
-                          <span className="text-[10px] text-[var(--color-text-tertiary)]">
-                            IMG
-                          </span>
+                        <div className="w-14 h-14 bg-[var(--color-surface)] rounded-lg shrink-0 overflow-hidden relative">
+                          {(() => {
+                            const src = productImageUrl(item.product)
+                            return src ? (
+                              <Image
+                                src={src}
+                                alt={item.product.name}
+                                fill
+                                sizes="56px"
+                                className="object-cover"
+                                placeholder="blur"
+                                blurDataURL={BLUR_PLACEHOLDER}
+                              />
+                            ) : (
+                              <span className="text-[10px] text-[var(--color-text-tertiary)] flex items-center justify-center w-full h-full">IMG</span>
+                            )
+                          })()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">
@@ -439,12 +542,26 @@ export function CheckoutFlow() {
                 <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
-              <button className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors">
-                <Check className="w-4 h-4" />
-                Place Order
+              <button
+                onClick={handlePlaceOrder}
+                disabled={orderLoading}
+                className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {orderLoading ? (
+                  <span className="w-4 h-4 border-2 border-[var(--color-bg)]/30 border-t-[var(--color-bg)] rounded-full animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" />
+                )}
+                {orderLoading ? 'Placing Order...' : 'Place Order'}
               </button>
             )}
           </div>
+
+          {orderError && (
+            <div className="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
+              {orderError}
+            </div>
+          )}
         </div>
 
         {/* Order summary sidebar */}
@@ -471,6 +588,12 @@ export function CheckoutFlow() {
                 <span className="text-[var(--color-text-secondary)]">Discount</span>
                 <span className="font-medium">৳0</span>
               </div>
+              {codFee > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-text-secondary)]">COD Fee</span>
+                  <span className="font-medium">{formatPrice(codFee)}</span>
+                </div>
+              )}
               <div className="pt-3 mt-3 border-t border-[var(--color-border)] flex justify-between">
                 <span className="font-semibold">Total</span>
                 <span className="text-lg font-bold">{formatPrice(total)}</span>

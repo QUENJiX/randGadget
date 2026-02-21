@@ -1,56 +1,44 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
+import type { ProductImage } from '@/lib/types'
 
-// Mock deals — replace with Supabase query for products with compare_price
-const deals = [
-  {
-    id: '1',
-    name: 'Sony WH-1000XM5',
-    slug: 'sony-wh-1000xm5',
-    price: 32999,
-    compare_price: 41999,
-    brand: 'Sony',
-    category: 'Audio',
-    tag: 'Best Seller',
-  },
-  {
-    id: '2',
-    name: 'Google Pixel Watch 3',
-    slug: 'google-pixel-watch-3',
-    price: 44999,
-    compare_price: 52999,
-    brand: 'Google',
-    category: 'Wearables',
-    tag: 'New',
-  },
-  {
-    id: '3',
-    name: 'Anker 737 Power Bank',
-    slug: 'anker-737-power-bank',
-    price: 8499,
-    compare_price: 11999,
-    brand: 'Anker',
-    category: 'Accessories',
-    tag: 'Hot Deal',
-  },
-  {
-    id: '4',
-    name: 'Nothing Ear (a)',
-    slug: 'nothing-ear-a',
-    price: 6999,
-    compare_price: 8999,
-    brand: 'Nothing',
-    category: 'Audio',
-    tag: 'Popular',
-  },
-]
+interface DealProduct {
+  id: string
+  name: string
+  slug: string
+  price: number
+  compare_price: number
+  brand: { name: string } | null
+  category: { name: string } | null
+  is_featured: boolean
+  images: ProductImage[]
+}
 
 export function DealsStrip() {
+  const [deals, setDeals] = useState<DealProduct[]>([])
+
+  useEffect(() => {
+    const supabase = createClient()
+    if (!supabase) return
+    supabase
+      .from('products')
+      .select('id, name, slug, price, compare_price, is_featured, brand:brands(name), category:categories(name), images:product_images(*)')
+      .eq('is_active', true)
+      .not('compare_price', 'is', null)
+      .order('compare_price', { ascending: false })
+      .limit(4)
+      .then(({ data }: { data: any }) => {
+        if (data) setDeals(data as DealProduct[])
+      })
+  }, [])
   return (
     <section className="py-20 md:py-28 bg-[var(--color-accent)] text-[var(--color-bg)]">
       <div className="container-wide">
@@ -86,9 +74,10 @@ export function DealsStrip() {
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
         >
           {deals.map((deal) => {
-            const discount = Math.round(
-              ((deal.compare_price - deal.price) / deal.compare_price) * 100
-            )
+            const discount = deal.compare_price
+              ? Math.round(((deal.compare_price - deal.price) / deal.compare_price) * 100)
+              : 0
+            const tag = deal.is_featured ? 'Featured' : 'Deal'
             return (
               <motion.div key={deal.id} variants={staggerItem}>
                 <Link
@@ -98,31 +87,40 @@ export function DealsStrip() {
                   {/* Tag */}
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-[10px] font-semibold uppercase tracking-wider opacity-60">
-                      {deal.tag}
+                      {tag}
                     </span>
                     <span className="px-2 py-0.5 bg-white/[0.15] rounded-md text-[11px] font-semibold">
                       -{discount}%
                     </span>
                   </div>
 
-                  {/* Product image placeholder */}
-                  <div className="w-full aspect-square bg-white/[0.06] rounded-xl mb-4 flex items-center justify-center">
-                    <svg
-                      width="40"
-                      height="40"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1"
-                      className="opacity-30"
-                    >
-                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                      <line x1="12" y1="18" x2="12.01" y2="18" />
-                    </svg>
+                  {/* Product image */}
+                  <div className="w-full aspect-square bg-white/[0.06] rounded-xl mb-4 overflow-hidden relative">
+                    {(() => {
+                      const src = productImageUrl(deal)
+                      return src ? (
+                        <Image
+                          src={src}
+                          alt={deal.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                          className="object-cover"
+                          placeholder="blur"
+                          blurDataURL={BLUR_PLACEHOLDER}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="opacity-30">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <line x1="12" y1="18" x2="12.01" y2="18" />
+                          </svg>
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   {/* Info */}
-                  <p className="text-xs opacity-50 mb-1">{deal.brand}</p>
+                  <p className="text-xs opacity-50 mb-1">{deal.brand?.name}</p>
                   <h3 className="text-sm font-semibold mb-3 line-clamp-1 group-hover:opacity-90 transition-opacity">
                     {deal.name}
                   </h3>

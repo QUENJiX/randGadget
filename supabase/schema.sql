@@ -154,15 +154,30 @@ CREATE TABLE product_variants (
 CREATE INDEX idx_products_name_trgm ON products USING gin (name gin_trgm_ops);
 CREATE INDEX idx_products_tags ON products USING gin (tags);
 
--- Full-text search vector
-ALTER TABLE products ADD COLUMN search_vector tsvector
-  GENERATED ALWAYS AS (
-    setweight(to_tsvector('english', coalesce(name, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(short_desc, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(array_to_string(tags, ' '), '')), 'C')
-  ) STORED;
+-- Full-text search vector column (maintained by trigger, NOT a generated column,
+-- because to_tsvector is STABLE — not IMMUTABLE — which PostgreSQL rejects in
+-- generated column expressions).
+ALTER TABLE products ADD COLUMN search_vector tsvector;
 
 CREATE INDEX idx_products_search ON products USING gin (search_vector);
+
+-- Trigger function to keep search_vector up-to-date on INSERT and UPDATE
+CREATE OR REPLACE FUNCTION products_search_vector_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('english', coalesce(NEW.name, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(NEW.short_desc, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(array_to_string(NEW.tags, ' '), '')), 'C');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_products_search_vector
+  BEFORE INSERT OR UPDATE OF name, short_desc, tags
+  ON products
+  FOR EACH ROW
+  EXECUTE FUNCTION products_search_vector_update();
 
 
 -- ============================================================================

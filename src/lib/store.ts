@@ -1,9 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { createClient } from '@/lib/supabase/client'
 import type { CartItem, PaymentMethod, CheckoutAddress } from '@/lib/types'
 
 /* ============================================================================
-   Cart Store — persisted to localStorage
+   Cart Store — persisted to localStorage, synced to Supabase for logged-in users
    ============================================================================ */
 
 interface CartStore {
@@ -14,6 +15,8 @@ interface CartStore {
   clearCart: () => void
   getSubtotal: () => number
   getItemCount: () => number
+  syncToServer: () => Promise<void>
+  loadFromServer: () => Promise<void>
 }
 
 export const useCartStore = create<CartStore>()(
@@ -71,6 +74,98 @@ export const useCartStore = create<CartStore>()(
 
       getItemCount: () =>
         get().items.reduce((sum, item) => sum + item.quantity, 0),
+
+      syncToServer: async () => {
+        const supabase = createClient()
+        if (!supabase) return
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        // Get or create cart
+        let { data: cart } = await supabase
+          .from('carts')
+          .select('id')
+          .eq('user_id', user.id)
+          .single()
+
+        if (!cart) {
+          const { data: newCart } = await supabase
+            .from('carts')
+            .insert({ user_id: user.id })
+            .select('id')
+            .single()
+          cart = newCart
+        }
+
+        if (!cart) return
+
+        // Clear server cart items and re-insert from local
+        await supabase.from('cart_items').delete().eq('cart_id', cart.id)
+
+        const items = get().items
+        if (items.length > 0) {
+          await supabase.from('cart_items').insert(
+            items.map((item) => ({
+              cart_id: cart.id,
+              product_id: item.product_id,
+              variant_id: item.variant_id,
+              quantity: item.quantity,
+            }))
+          )
+        }
+      },
+
+      loadFromServer: async () => {
+        const supabase = createClient()
+        if (!supabase) return
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        const { data: cart } = await supabase
+          .from('carts')
+          .select('id')
+          .eq('user_id', user.id)
+          .single()
+
+        if (!cart) return
+
+        const { data: serverItems } = await supabase
+          .from('cart_items')
+          .select(`
+            id,
+            product_id,
+            variant_id,
+            quantity,
+            product:products(*, brand:brands(*), category:categories(*), images:product_images(*)),
+            variant:product_variants(*)
+          `)
+          .eq('cart_id', cart.id)
+
+        if (!serverItems || serverItems.length === 0) return
+
+        const localItems = get().items
+        // Merge: local items take precedence, add server-only items
+        const merged = [...localItems]
+        for (const si of serverItems) {
+          const exists = merged.find(
+            (li) => li.product_id === si.product_id && li.variant_id === si.variant_id
+          )
+          if (!exists && si.product) {
+            merged.push({
+              id: si.id,
+              product_id: si.product_id,
+              variant_id: si.variant_id,
+              quantity: si.quantity,
+              product: si.product as any,
+              variant: si.variant as any || undefined,
+            })
+          }
+        }
+
+        if (merged.length !== localItems.length) {
+          set({ items: merged })
+        }
+      },
     }),
     { name: 'gadgetbd-cart' }
   )

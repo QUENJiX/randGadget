@@ -2,9 +2,10 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ArrowLeft } from 'lucide-react'
 import { useCartStore } from '@/lib/store'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
 
 export function CartView() {
@@ -86,19 +87,28 @@ export function CartView() {
                   className="flex gap-5 p-5 rounded-2xl border border-[var(--color-border)]/50 bg-[var(--color-bg-card)]"
                 >
                   {/* Image */}
-                  <div className="w-24 h-24 md:w-28 md:h-28 bg-[var(--color-bg-alt)] rounded-xl shrink-0 flex items-center justify-center">
-                    <svg
-                      width="32"
-                      height="32"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      className="text-[var(--color-text-tertiary)]"
-                    >
-                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                      <line x1="12" y1="18" x2="12.01" y2="18" />
-                    </svg>
+                  <div className="w-24 h-24 md:w-28 md:h-28 bg-[var(--color-bg-alt)] rounded-xl shrink-0 overflow-hidden relative">
+                    {(() => {
+                      const src = productImageUrl(item.product)
+                      return src ? (
+                        <Image
+                          src={src}
+                          alt={item.product.name}
+                          fill
+                          sizes="112px"
+                          className="object-cover"
+                          placeholder="blur"
+                          blurDataURL={BLUR_PLACEHOLDER}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-text-tertiary)]">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                            <line x1="12" y1="18" x2="12.01" y2="18" />
+                          </svg>
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   {/* Info */}

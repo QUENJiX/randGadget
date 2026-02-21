@@ -1,62 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { SlidersHorizontal, Grid3X3, LayoutList, X } from 'lucide-react'
 import { ProductCard } from '@/components/products'
 import { fadeUp, staggerContainer } from '@/lib/animations'
+import { createClient } from '@/lib/supabase/client'
 import type { Product, Brand, Category } from '@/lib/types'
 
-// Mock data for demo
-const mockProducts: Product[] = Array.from({ length: 8 }, (_, i) => ({
-  id: `search-${i + 1}`,
-  sku: `SKU-${i + 1}`,
-  name: [
-    'iPhone 16 Pro Max 256GB',
-    'Samsung Galaxy S25 Ultra',
-    'MacBook Air M3 15"',
-    'Sony WH-1000XM5',
-    'Google Pixel Watch 3',
-    'Nothing Ear (a)',
-    'Anker 737 Power Bank',
-    'Apple AirPods Pro 2',
-  ][i],
-  slug: `product-${i + 1}`,
-  brand_id: null,
-  category_id: null,
-  short_desc: 'Premium tech product with warranty',
-  description: null,
-  price: [189999, 164999, 179999, 32999, 44999, 6999, 8499, 34999][i],
-  compare_price: [199999, 174999, null, 41999, 52999, 8999, 11999, 39999][i] as number | null,
-  cost_price: null,
-  stock: 10,
-  weight_kg: 0.5,
-  is_featured: i < 3,
-  is_active: true,
-  meta_title: null,
-  meta_description: null,
-  tags: [],
-  specs: {},
-  created_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-  brand: {
-    id: i + 1,
-    name: ['Apple', 'Samsung', 'Apple', 'Sony', 'Google', 'Nothing', 'Anker', 'Apple'][i],
-    slug: ['apple', 'samsung', 'apple', 'sony', 'google', 'nothing', 'anker', 'apple'][i],
-    logo_url: null,
-  },
-  category: {
-    id: 1,
-    parent_id: null,
-    name: ['Smartphones', 'Smartphones', 'Laptops', 'Audio', 'Wearables', 'Audio', 'Accessories', 'Audio'][i],
-    slug: 'cat',
-    icon_svg: null,
-    sort_order: 0,
-  },
-}))
-
-const categories = ['All', 'Smartphones', 'Laptops', 'Audio', 'Wearables', 'Accessories']
-const brands = ['All', 'Apple', 'Samsung', 'Sony', 'Google', 'Nothing', 'Anker']
 const sortOptions = [
   { label: 'Relevance', value: 'relevance' },
   { label: 'Price: Low to High', value: 'price_asc' },
@@ -69,18 +20,66 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ query }: SearchResultsProps) {
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<string[]>([])
+  const [brands, setBrands] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedBrand, setSelectedBrand] = useState('All')
   const [sortBy, setSortBy] = useState('relevance')
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
-  // Filter mock products
-  const filtered = mockProducts.filter((p) => {
-    if (selectedCategory !== 'All' && p.category?.name !== selectedCategory) return false
-    if (selectedBrand !== 'All' && p.brand?.name !== selectedBrand) return false
-    return true
-  })
+  // Fetch products from Supabase
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true)
+      const supabase = createClient()
+      if (!supabase) { setLoading(false); return }
+
+      let q = supabase
+        .from('products')
+        .select('*, brand:brands(*), category:categories(*), images:product_images(*)')
+        .eq('is_active', true)
+
+      if (query) {
+        q = q.or(`name.ilike.%${query}%,short_desc.ilike.%${query}%,tags.cs.{${query}}`)
+      }
+
+      if (selectedCategory !== 'All') {
+        q = q.eq('category.name', selectedCategory)
+      }
+      if (selectedBrand !== 'All') {
+        q = q.eq('brand.name', selectedBrand)
+      }
+
+      if (sortBy === 'price_asc') q = q.order('price', { ascending: true })
+      else if (sortBy === 'price_desc') q = q.order('price', { ascending: false })
+      else if (sortBy === 'newest') q = q.order('created_at', { ascending: false })
+      else q = q.order('is_featured', { ascending: false }).order('created_at', { ascending: false })
+
+      const { data } = await q.limit(24)
+
+      if (data) {
+        setProducts(data as Product[])
+      }
+      setLoading(false)
+    }
+
+    fetchProducts()
+  }, [query, selectedCategory, selectedBrand, sortBy])
+
+  // Load filter options (categories & brands)
+  useEffect(() => {
+    const supabase = createClient()
+    if (!supabase) return
+    supabase.from('categories').select('name').order('name').then(({ data }: { data: any }) => {
+      if (data) setCategories(['All', ...data.map((c: any) => c.name)])
+    })
+    supabase.from('brands').select('name').order('name').then(({ data }: { data: any }) => {
+      if (data) setBrands(['All', ...data.map((b: any) => b.name)])
+    })
+  }, [])
 
   return (
     <div className="pt-28 pb-20">
@@ -101,7 +100,7 @@ export function SearchResults({ query }: SearchResultsProps) {
                 &ldquo;{query}&rdquo;
               </h1>
               <p className="text-sm text-[var(--color-text-secondary)] mt-2">
-                {filtered.length} products found
+                {products.length} products found
               </p>
             </div>
           ) : (
@@ -263,7 +262,7 @@ export function SearchResults({ query }: SearchResultsProps) {
                 : 'grid-cols-1'
             }`}
           >
-            {filtered.map((product, index) => (
+            {products.map((product, index) => (
               <ProductCard key={product.id} product={product} index={index} />
             ))}
           </motion.div>

@@ -90,3 +90,45 @@ export const orderStatusColors: Record<string, string> = {
   cancelled: 'text-red-600 bg-red-50',
   returned: 'text-stone-600 bg-stone-50',
 }
+
+// --- Image helpers ---
+
+/** Supabase Storage public base URL for product images */
+const STORAGE_BASE =
+  (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '') +
+  '/storage/v1/object/public/product-images/'
+
+import type { ProductImage, Product } from '@/lib/types'
+
+/**
+ * Get the full public URL for a product image.
+ * The `url` column stores a path relative to the bucket root.
+ */
+export function imageUrl(path: string): string {
+  if (!path) return ''
+  // Already a full URL (external or absolute)
+  if (path.startsWith('http://') || path.startsWith('https://')) return path
+  return STORAGE_BASE + path
+}
+
+/**
+ * Resolve the primary image URL for a product.
+ * Falls back to the first image in the array, then returns null.
+ */
+export function productImageUrl(product: {
+  images?: ProductImage[]
+  primary_image?: string | null
+}): string | null {
+  // Use explicit primary_image field (from views / search RPCs)
+  if (product.primary_image) return imageUrl(product.primary_image)
+  // Find the image flagged as primary
+  const primary = product.images?.find((i) => i.is_primary)
+  if (primary) return imageUrl(primary.url)
+  // Fallback to first image
+  if (product.images && product.images.length > 0) return imageUrl(product.images[0].url)
+  return null
+}
+
+/** Tiny transparent 1×1 PNG used as the blur placeholder when no real blur hash exists */
+export const BLUR_PLACEHOLDER =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mN88P/BfwAJhAPk3KFb2AAAAABJRU5ErkJggg=='

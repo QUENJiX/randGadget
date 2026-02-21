@@ -2,9 +2,10 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Heart, ShoppingBag } from 'lucide-react'
 import { cardHover, staggerItem } from '@/lib/animations'
-import { formatPrice, calcDiscount } from '@/lib/utils'
+import { formatPrice, calcDiscount, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
 import type { Product } from '@/lib/types'
 
 interface ProductCardProps {
@@ -32,28 +33,32 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         {/* Image */}
         <Link href={`/product/${product.slug}`} className="block">
           <div className="relative aspect-square bg-[var(--color-bg-alt)] overflow-hidden">
-            {/* Placeholder — replace with Next.js Image */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-2 rounded-2xl bg-[var(--color-surface)] flex items-center justify-center">
-                  <svg
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    className="text-[var(--color-text-tertiary)]"
-                  >
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                    <line x1="12" y1="18" x2="12.01" y2="18" />
-                  </svg>
+            {(() => {
+              const src = productImageUrl(product)
+              return src ? (
+                <Image
+                  src={src}
+                  alt={product.name}
+                  fill
+                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  placeholder="blur"
+                  blurDataURL={BLUR_PLACEHOLDER}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto mb-2 rounded-2xl bg-[var(--color-surface)] flex items-center justify-center">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-text-tertiary)]">
+                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                        <line x1="12" y1="18" x2="12.01" y2="18" />
+                      </svg>
+                    </div>
+                    <span className="text-xs text-[var(--color-text-tertiary)]">{product.brand?.name || 'Product'}</span>
+                  </div>
                 </div>
-                <span className="text-xs text-[var(--color-text-tertiary)]">
-                  {product.brand?.name || 'Product'}
-                </span>
-              </div>
-            </div>
+              )
+            })()}
 
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-1.5">

@@ -7,10 +7,11 @@ import Link from 'next/link'
 import { useSearchStore } from '@/lib/store'
 import { searchModalVariants, fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
 import { debounce, formatPrice } from '@/lib/utils'
+import { createClient } from '@/lib/supabase/client'
 import type { SearchResult } from '@/lib/types'
 
-// Mock trending searches — replace with Supabase query
-const trendingSearches = [
+// Trending searches — loaded from popular terms
+const defaultTrendingSearches = [
   'iPhone 16 Pro',
   'Samsung Galaxy S25',
   'AirPods Pro',
@@ -19,62 +20,54 @@ const trendingSearches = [
   'Pixel Watch',
 ]
 
-// Mock results — replace with actual Supabase RPC call
-const mockResults: SearchResult[] = [
-  {
-    id: '1',
-    name: 'iPhone 16 Pro Max — 256GB',
-    slug: 'iphone-16-pro-max-256gb',
-    price: 189999,
-    compare_price: 199999,
-    short_desc: 'A18 Pro chip, 48MP camera system, titanium design',
-    brand_name: 'Apple',
-    category_name: 'Smartphones',
-    primary_image: '/products/iphone-16-pro.jpg',
-    relevance: 1,
-  },
-  {
-    id: '2',
-    name: 'Samsung Galaxy S25 Ultra',
-    slug: 'samsung-galaxy-s25-ultra',
-    price: 164999,
-    compare_price: 174999,
-    short_desc: 'Snapdragon 8 Elite, 200MP camera, S Pen included',
-    brand_name: 'Samsung',
-    category_name: 'Smartphones',
-    primary_image: '/products/galaxy-s25.jpg',
-    relevance: 0.9,
-  },
-  {
-    id: '3',
-    name: 'MacBook Air 15" M3',
-    slug: 'macbook-air-15-m3',
-    price: 179999,
-    compare_price: null,
-    short_desc: '15.3" Liquid Retina, 18hr battery, 8-core GPU',
-    brand_name: 'Apple',
-    category_name: 'Laptops',
-    primary_image: '/products/macbook-air.jpg',
-    relevance: 0.85,
-  },
-]
-
 export function SearchModal() {
   const { isOpen, query, close, setQuery } = useSearchStore()
   const inputRef = useRef<HTMLInputElement>(null)
   const [results, setResults] = useState<SearchResult[]>([])
   const [loading, setLoading] = useState(false)
+  const [trendingSearches] = useState<string[]>(defaultTrendingSearches)
   const [recentSearches] = useState<string[]>([
     'wireless earbuds',
     'laptop stand',
     'usb-c hub',
   ])
 
+  const modalRef = useRef<HTMLDivElement>(null)
+
   // Focus input when modal opens
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100)
     }
+  }, [isOpen])
+
+  // Focus trap: keep Tab/Shift+Tab inside the modal
+  useEffect(() => {
+    if (!isOpen) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const modal = modalRef.current
+      if (!modal) return
+      const focusable = modal.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
   }, [isOpen])
 
   // Keyboard shortcut: Cmd/Ctrl + K
@@ -92,21 +85,27 @@ export function SearchModal() {
     return () => window.removeEventListener('keydown', handler)
   }, [isOpen, close])
 
-  // Debounced search
+  // Debounced search using Supabase RPC
   const performSearch = useCallback(
-    debounce((q: string) => {
+    debounce(async (q: string) => {
       if (q.length < 2) {
         setResults([])
         setLoading(false)
         return
       }
-      // TODO: Replace with actual Supabase RPC call:
-      // const { data } = await supabase.rpc('search_products', { search_query: q })
-      setResults(
-        mockResults.filter((r) =>
-          r.name.toLowerCase().includes(q.toLowerCase())
-        )
-      )
+      const supabase = createClient()
+      if (!supabase) {
+        setLoading(false)
+        return
+      }
+      const { data, error } = await supabase.rpc('search_products', {
+        search_query: q,
+        page_size: 5,
+        page_offset: 0,
+      })
+      if (!error && data) {
+        setResults(data as SearchResult[])
+      }
       setLoading(false)
     }, 300),
     []
@@ -133,7 +132,7 @@ export function SearchModal() {
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 z-[90] flex items-start justify-center pt-[10vh] px-4">
+          <div ref={modalRef} role="dialog" aria-modal="true" aria-label="Search products" className="fixed inset-0 z-[90] flex items-start justify-center pt-[10vh] px-4">
             <motion.div
               variants={searchModalVariants}
               initial="hidden"

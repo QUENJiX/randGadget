@@ -2,19 +2,10 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import {
-  ShoppingBag,
-  Heart,
-  Minus,
-  Plus,
-  Truck,
-  Shield,
-  RotateCcw,
-  Star,
-  ChevronDown,
-} from 'lucide-react'
+import { ShoppingBag, Heart, Minus, Plus, Truck, Shield, RotateCcw, Star, ChevronDown } from 'lucide-react'
+import Image from 'next/image'
 import { useCartStore } from '@/lib/store'
-import { formatPrice, calcDiscount, cn } from '@/lib/utils'
+import { formatPrice, calcDiscount, cn, productImageUrl, imageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
 import type { Product, ProductVariant } from '@/lib/types'
 
@@ -28,6 +19,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
   )
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'specs' | 'description' | 'reviews'>('specs')
+  const [activeImage, setActiveImage] = useState(0)
   const addItem = useCartStore((s) => s.addItem)
 
   const currentPrice = selectedVariant?.price ?? product.price
@@ -57,43 +49,66 @@ export function ProductDetail({ product }: ProductDetailProps) {
             animate="visible"
           >
             {/* Main image */}
-            <div className="aspect-square bg-[var(--color-bg-alt)] rounded-2xl border border-[var(--color-border)]/40 overflow-hidden flex items-center justify-center mb-4">
-              <div className="text-center">
-                <div className="w-40 h-40 mx-auto rounded-3xl bg-[var(--color-surface)] flex items-center justify-center">
-                  <svg
-                    width="64"
-                    height="64"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    className="text-[var(--color-text-tertiary)]"
-                  >
-                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                    <line x1="12" y1="18" x2="12.01" y2="18" />
-                  </svg>
-                </div>
-                <p className="mt-4 text-sm text-[var(--color-text-tertiary)]">
-                  {product.brand?.name} {product.name}
-                </p>
-              </div>
+            <div className="aspect-square bg-[var(--color-bg-alt)] rounded-2xl border border-[var(--color-border)]/40 overflow-hidden relative mb-4">
+              {(() => {
+                const images = product.images ?? []
+                const src = images[activeImage]
+                  ? imageUrl(images[activeImage].url)
+                  : productImageUrl(product)
+                return src ? (
+                  <Image
+                    src={src}
+                    alt={images[activeImage]?.alt_text ?? product.name}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover"
+                    placeholder="blur"
+                    blurDataURL={BLUR_PLACEHOLDER}
+                    priority
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-40 h-40 mx-auto rounded-3xl bg-[var(--color-surface)] flex items-center justify-center">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-[var(--color-text-tertiary)]">
+                          <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                          <line x1="12" y1="18" x2="12.01" y2="18" />
+                        </svg>
+                      </div>
+                      <p className="mt-4 text-sm text-[var(--color-text-tertiary)]">{product.brand?.name} {product.name}</p>
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Thumbnails */}
             <div className="flex gap-3">
-              {[1, 2, 3, 4].map((i) => (
+              {(product.images && product.images.length > 0
+                ? product.images
+                : [null, null, null, null]
+              ).map((img, i) => (
                 <button
-                  key={i}
+                  key={img?.id ?? i}
+                  onClick={() => setActiveImage(i)}
                   className={cn(
-                    'w-20 h-20 rounded-xl bg-[var(--color-bg-alt)] border overflow-hidden flex items-center justify-center transition-all',
-                    i === 1
+                    'w-20 h-20 rounded-xl bg-[var(--color-bg-alt)] border overflow-hidden relative transition-all',
+                    activeImage === i
                       ? 'border-[var(--color-accent)]'
                       : 'border-[var(--color-border)]/40 hover:border-[var(--color-border)]'
                   )}
                 >
-                  <span className="text-[10px] text-[var(--color-text-tertiary)]">
-                    {i}
-                  </span>
+                  {img ? (
+                    <Image
+                      src={imageUrl(img.url)}
+                      alt={img.alt_text ?? `${product.name} ${i + 1}`}
+                      fill
+                      sizes="80px"
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-[10px] text-[var(--color-text-tertiary)] flex items-center justify-center h-full">{i + 1}</span>
+                  )}
                 </button>
               ))}
             </div>

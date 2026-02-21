@@ -11,8 +11,10 @@ import {
   X,
   Heart,
   ChevronDown,
+  LogOut,
 } from 'lucide-react'
 import { useCartStore, useSearchStore } from '@/lib/store'
+import { useAuth } from '@/components/auth'
 import { navbarSlide, mobileMenuOverlay, mobileMenuPanel, fadeDown } from '@/lib/animations'
 
 const navLinks = [
@@ -26,9 +28,11 @@ const navLinks = [
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { scrollY } = useScroll()
   const itemCount = useCartStore((s) => s.getItemCount())
   const openSearch = useSearchStore((s) => s.open)
+  const { user, loading: authLoading, signOut } = useAuth()
 
   // Track scroll for header background
   useEffect(() => {
@@ -99,7 +103,10 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
-              <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors rounded-lg hover:bg-[var(--color-accent-subtle)]">
+              <button
+                aria-label="More navigation"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors rounded-lg hover:bg-[var(--color-accent-subtle)]"
+              >
                 More
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
@@ -123,13 +130,57 @@ export function Header() {
                 <Heart className="w-5 h-5" />
               </Link>
 
-              <Link
-                href="/account"
-                className="hidden sm:flex p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
-                aria-label="Account"
-              >
-                <User className="w-5 h-5" />
-              </Link>
+              {/* Account / User menu */}
+              {user ? (
+                <div className="relative hidden sm:block">
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                    aria-label="User menu"
+                  >
+                    <div className="w-5 h-5 bg-[var(--color-accent)] rounded-full flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-[var(--color-bg)]">
+                        {(user.user_metadata?.full_name || user.email || '?')[0].toUpperCase()}
+                      </span>
+                    </div>
+                  </button>
+                  {userMenuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
+                      <div className="absolute right-0 top-12 z-50 w-56 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-xl">
+                        <div className="px-4 py-2 border-b border-[var(--color-border)]">
+                          <p className="text-sm font-medium truncate">{user.user_metadata?.full_name || 'User'}</p>
+                          <p className="text-xs text-[var(--color-text-tertiary)] truncate">{user.email}</p>
+                        </div>
+                        <Link
+                          href="/account"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-[var(--color-surface)] transition-colors"
+                        >
+                          <User className="w-4 h-4" /> My Account
+                        </Link>
+                        <button
+                          onClick={async () => {
+                            setUserMenuOpen(false)
+                            await signOut()
+                          }}
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--color-error)] hover:bg-[var(--color-surface)] transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" /> Sign Out
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/account"
+                  className="hidden sm:flex p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                  aria-label="Account"
+                >
+                  <User className="w-5 h-5" />
+                </Link>
+              )}
 
               <Link
                 href="/cart"
@@ -208,13 +259,34 @@ export function Header() {
                   </motion.div>
                 ))}
                 <div className="pt-6 mt-6 border-t border-[var(--color-border)] space-y-1">
-                  <Link
-                    href="/account"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-3 px-4 text-sm rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
-                  >
-                    <User className="w-4 h-4" /> Account
-                  </Link>
+                  {user ? (
+                    <>
+                      <Link
+                        href="/account"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 py-3 px-4 text-sm rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                      >
+                        <User className="w-4 h-4" /> My Account
+                      </Link>
+                      <button
+                        onClick={async () => {
+                          setMobileOpen(false)
+                          await signOut()
+                        }}
+                        className="w-full flex items-center gap-3 py-3 px-4 text-sm text-[var(--color-error)] rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" /> Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      href="/account"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 py-3 px-4 text-sm rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                    >
+                      <User className="w-4 h-4" /> Sign In
+                    </Link>
+                  )}
                   <Link
                     href="/wishlist"
                     onClick={() => setMobileOpen(false)}
