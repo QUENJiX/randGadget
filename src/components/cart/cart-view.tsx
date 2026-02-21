@@ -35,7 +35,7 @@ export function CartView() {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[var(--color-accent)] text-[var(--color-bg)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
             >
               Start Shopping
               <ArrowRight className="w-4 h-4" />
@@ -200,7 +200,7 @@ export function CartView() {
 
               <Link
                 href="/checkout"
-                className="w-full inline-flex items-center justify-center gap-2 py-3.5 bg-[var(--color-accent)] text-[var(--color-bg)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
               >
                 Proceed to Checkout
                 <ArrowRight className="w-4 h-4" />

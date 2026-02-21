@@ -72,7 +72,7 @@ export default function SupportPage() {
             </div>
             <button
               type="submit"
-              className="px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+              className="px-6 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
             >
               Send Message
             </button>

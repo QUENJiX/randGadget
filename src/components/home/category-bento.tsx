@@ -21,7 +21,7 @@ const bentoCards: BentoCard[] = [
     href: '/category/smartphones',
     icon: Smartphone,
     className: 'md:col-span-2 md:row-span-2',
-    accent: 'from-stone-100 to-stone-50 dark:from-stone-900 dark:to-stone-950',
+    accent: 'from-teal-50 to-emerald-50 dark:from-teal-950/40 dark:to-emerald-950/40',
   },
   {
     title: 'Laptops',
@@ -29,7 +29,7 @@ const bentoCards: BentoCard[] = [
     href: '/category/laptops',
     icon: Laptop,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-zinc-100 to-zinc-50 dark:from-zinc-900 dark:to-zinc-950',
+    accent: 'from-sky-50 to-cyan-50 dark:from-sky-950/40 dark:to-cyan-950/40',
   },
   {
     title: 'Audio',
@@ -37,7 +37,7 @@ const bentoCards: BentoCard[] = [
     href: '/category/audio',
     icon: Headphones,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-neutral-100 to-neutral-50 dark:from-neutral-900 dark:to-neutral-950',
+    accent: 'from-violet-50 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/40',
   },
   {
     title: 'Wearables',
@@ -45,7 +45,7 @@ const bentoCards: BentoCard[] = [
     href: '/category/wearables',
     icon: Watch,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-stone-100 to-stone-50 dark:from-stone-900 dark:to-stone-950',
+    accent: 'from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40',
   },
   {
     title: 'Accessories',
@@ -53,7 +53,7 @@ const bentoCards: BentoCard[] = [
     href: '/category/accessories',
     icon: Cable,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-zinc-100 to-zinc-50 dark:from-zinc-900 dark:to-zinc-950',
+    accent: 'from-rose-50 to-pink-50 dark:from-rose-950/40 dark:to-pink-950/40',
   },
 ]
 

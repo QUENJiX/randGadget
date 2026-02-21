@@ -45,7 +45,7 @@ export function NewsletterCTA() {
               />
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[var(--color-accent)] text-[var(--color-bg)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors shrink-0 group"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors shrink-0 group"
               >
                 Subscribe
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

@@ -144,12 +144,12 @@ export default function AdminOrders() {
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell">
                       <p className="text-sm">{paymentMethodLabels[order.payment_method] || order.payment_method}</p>
-                      <p className={`text-xs capitalize ${order.payment_status === 'paid' ? 'text-green-600' : order.payment_status === 'failed' ? 'text-red-600' : 'text-amber-600'}`}>
+                      <p className={`text-xs capitalize ${order.payment_status === 'paid' ? 'text-green-600 dark:text-green-400' : order.payment_status === 'failed' ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
                         {order.payment_status}
                       </p>
                     </td>
                     <td className="px-4 py-3 text-center">
-                      <span className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full ${orderStatusColors[order.status] || 'text-stone-600 bg-stone-50'}`}>
+                      <span className={`inline-block text-xs font-medium px-2.5 py-1 rounded-full ${orderStatusColors[order.status] || 'text-slate-600 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/30'}`}>
                         {orderStatusLabels[order.status] || order.status}
                       </span>
                     </td>

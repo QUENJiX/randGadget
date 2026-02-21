@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { SlidersHorizontal, Grid3X3, LayoutList, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
 import { ProductCard } from '@/components/products'
 import { fadeUp, staggerContainer } from '@/lib/animations'
 import { createClient } from '@/lib/supabase/client'
@@ -17,41 +16,18 @@ const sortOptions = [
   { label: 'Newest First', value: 'newest' },
 ]
 
-const categoryMeta: Record<string, { title: string; description: string }> = {
-  smartphones: {
-    title: 'Smartphones',
-    description: 'Flagship phones from Apple, Samsung, Google, Xiaomi, and more — all with official Bangladesh warranty.',
-  },
-  laptops: {
-    title: 'Laptops',
-    description: 'MacBooks, ThinkPads, gaming powerhouses, and ultrabooks for every budget.',
-  },
-  audio: {
-    title: 'Audio',
-    description: 'Premium earbuds, headphones, and speakers from Sony, Samsung, Apple, and Anker.',
-  },
-  wearables: {
-    title: 'Wearables',
-    description: 'Smartwatches and fitness trackers for every lifestyle.',
-  },
-  accessories: {
-    title: 'Accessories',
-    description: 'Chargers, cases, cables, and essential tech gear.',
-  },
-}
-
-export default function CategoryPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const meta = categoryMeta[slug] || { title: slug, description: '' }
-
+export default function AllProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<string[]>(['All'])
   const [brands, setBrands] = useState<string[]>(['All'])
+  const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedBrand, setSelectedBrand] = useState('All')
   const [sortBy, setSortBy] = useState('featured')
   const [loading, setLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true)
@@ -62,33 +38,44 @@ export default function CategoryPage() {
         .from('products')
         .select('*, brand:brands(*), category:categories(*), images:product_images(*)')
         .eq('is_active', true)
-        .eq('category.slug', slug)
-
-      if (selectedBrand !== 'All') {
-        q = q.eq('brand.name', selectedBrand)
-      }
 
       if (sortBy === 'price_asc') q = q.order('price', { ascending: true })
       else if (sortBy === 'price_desc') q = q.order('price', { ascending: false })
       else if (sortBy === 'newest') q = q.order('created_at', { ascending: false })
       else q = q.order('is_featured', { ascending: false }).order('created_at', { ascending: false })
 
-      const { data } = await q.limit(40)
+      const { data } = await q.limit(60)
 
       if (data) {
-        // Filter client-side for joined category match (PostgREST returns nulls for non-matching joins)
-        const filtered = (data as Product[]).filter((p) => p.category?.slug === slug)
-        setProducts(filtered)
+        let filtered = data as Product[]
 
-        const brandSet = new Set<string>()
-        filtered.forEach((p) => { if (p.brand?.name) brandSet.add(p.brand.name) })
-        setBrands(['All', ...Array.from(brandSet).sort()])
+        if (selectedCategory !== 'All') {
+          filtered = filtered.filter((p) => p.category?.name === selectedCategory)
+        }
+        if (selectedBrand !== 'All') {
+          filtered = filtered.filter((p) => p.brand?.name === selectedBrand)
+        }
+
+        setProducts(filtered)
       }
       setLoading(false)
     }
 
     fetchProducts()
-  }, [slug, selectedBrand, sortBy])
+  }, [selectedCategory, selectedBrand, sortBy])
+
+  // Load filter options
+  useEffect(() => {
+    const supabase = createClient()
+    if (!supabase) return
+
+    supabase.from('categories').select('name').order('name').then(({ data }: { data: any }) => {
+      if (data) setCategories(['All', ...data.map((c: any) => c.name)])
+    })
+    supabase.from('brands').select('name').order('name').then(({ data }: { data: any }) => {
+      if (data) setBrands(['All', ...data.map((b: any) => b.name)])
+    })
+  }, [])
 
   return (
     <div className="pt-28 pb-20">
@@ -107,14 +94,12 @@ export default function CategoryPage() {
         {/* Header */}
         <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-8">
           <p className="text-xs text-[var(--color-text-tertiary)] uppercase tracking-wider mb-2">
-            Category
+            Browse
           </p>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight capitalize">
-            {meta.title}
-          </h1>
-          {meta.description && (
-            <p className="mt-2 text-[var(--color-text-secondary)] max-w-xl">{meta.description}</p>
-          )}
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">All Products</h1>
+          <p className="mt-2 text-[var(--color-text-secondary)] max-w-xl">
+            Explore our full collection of gadgets, from smartphones to accessories.
+          </p>
         </motion.div>
 
         {/* Toolbar */}
@@ -168,22 +153,42 @@ export default function CategoryPage() {
             exit={{ height: 0, opacity: 0 }}
             className="mb-6 p-4 bg-[var(--color-bg-alt)] rounded-xl border border-[var(--color-border)]/50"
           >
-            <div>
-              <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2">Brand</p>
-              <div className="flex flex-wrap gap-2">
-                {brands.map((b) => (
-                  <button
-                    key={b}
-                    onClick={() => setSelectedBrand(b)}
-                    className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
-                      selectedBrand === b
-                        ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)] border-[var(--color-accent)]'
-                        : 'border-[var(--color-border)] hover:bg-[var(--color-bg-card)]'
-                    }`}
-                  >
-                    {b}
-                  </button>
-                ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2">Category</p>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setSelectedCategory(c)}
+                      className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                        selectedCategory === c
+                          ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)] border-[var(--color-accent)]'
+                          : 'border-[var(--color-border)] hover:bg-[var(--color-bg-card)]'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] mb-2">Brand</p>
+                <div className="flex flex-wrap gap-2">
+                  {brands.map((b) => (
+                    <button
+                      key={b}
+                      onClick={() => setSelectedBrand(b)}
+                      className={`px-3 py-1.5 text-sm rounded-full border transition-colors ${
+                        selectedBrand === b
+                          ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)] border-[var(--color-accent)]'
+                          : 'border-[var(--color-border)] hover:bg-[var(--color-bg-card)]'
+                      }`}
+                    >
+                      {b}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -192,7 +197,7 @@ export default function CategoryPage() {
         {/* Product grid */}
         {loading ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
+            {Array.from({ length: 12 }).map((_, i) => (
               <div key={i} className="animate-pulse">
                 <div className="aspect-square bg-[var(--color-surface)] rounded-2xl mb-3" />
                 <div className="h-3 bg-[var(--color-surface)] rounded w-2/3 mb-2" />

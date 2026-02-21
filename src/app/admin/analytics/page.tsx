@@ -183,7 +183,7 @@ export default function AdminAnalytics() {
               onClick={() => setPeriod(p)}
               className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
                 period === p
-                  ? 'bg-[var(--color-accent)] text-white'
+                  ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)]'
                   : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text)]'
               }`}
             >
@@ -209,28 +209,28 @@ export default function AdminAnalytics() {
                 value: formatPrice(stats.totalRevenue),
                 icon: DollarSign,
                 change: revChange,
-                color: 'text-green-600 bg-green-50',
+                color: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30',
               },
               {
                 label: 'Orders',
                 value: stats.totalOrders.toString(),
                 icon: ShoppingBag,
                 change: orderChange,
-                color: 'text-blue-600 bg-blue-50',
+                color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/30',
               },
               {
                 label: 'Avg Order Value',
                 value: formatPrice(stats.avgOrderValue),
                 icon: TrendingUp,
                 change: null,
-                color: 'text-purple-600 bg-purple-50',
+                color: 'text-purple-600 bg-purple-50 dark:text-purple-400 dark:bg-purple-950/30',
               },
               {
                 label: 'New Customers',
                 value: stats.newCustomers.toString(),
                 icon: Users,
                 change: null,
-                color: 'text-amber-600 bg-amber-50',
+                color: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/30',
               },
             ].map((s) => (
               <div
@@ -248,7 +248,7 @@ export default function AdminAnalytics() {
                 <p className="text-2xl font-bold">{s.value}</p>
                 {s.change !== null && (
                   <p className={`text-xs mt-1 inline-flex items-center gap-0.5 font-medium ${
-                    s.change >= 0 ? 'text-green-600' : 'text-red-600'
+                    s.change >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                   }`}>
                     {s.change >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
                     {Math.abs(s.change).toFixed(1)}% vs prev {period}d
@@ -276,7 +276,7 @@ export default function AdminAnalytics() {
                       className="w-full bg-[var(--color-accent)]/70 hover:bg-[var(--color-accent)] rounded-t transition-colors"
                       style={{ height: `${Math.max(h, 1)}%` }}
                     />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-stone-900 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-10 pointer-events-none">
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block bg-slate-800 dark:bg-slate-700 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap z-10 pointer-events-none">
                       <p className="font-semibold">{formatPrice(d.revenue)}</p>
                       <p className="opacity-70">{d.orders} orders · {d.date}</p>
                     </div>

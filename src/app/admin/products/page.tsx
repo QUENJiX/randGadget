@@ -78,7 +78,7 @@ export default function AdminProducts() {
         </div>
         <Link
           href="/admin/products/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--color-accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
         >
           <Plus className="w-4 h-4" />
           Add Product
@@ -152,14 +152,14 @@ export default function AdminProducts() {
                     </td>
                     <td className="px-4 py-3 text-right font-medium">{formatPrice(product.price)}</td>
                     <td className="px-4 py-3 text-right">
-                      <span className={`font-medium ${product.stock <= 0 ? 'text-red-600' : product.stock <= 5 ? 'text-amber-600' : 'text-[var(--color-text)]'}`}>
+                      <span className={`font-medium ${product.stock <= 0 ? 'text-red-600 dark:text-red-400' : product.stock <= 5 ? 'text-amber-600 dark:text-amber-400' : 'text-[var(--color-text)]'}`}>
                         {product.stock}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => toggleFeatured(product.id, product.is_featured)}
-                        className={`p-1 rounded transition-colors ${product.is_featured ? 'text-amber-500' : 'text-[var(--color-text-tertiary)] hover:text-amber-400'}`}
+                        className={`p-1 rounded transition-colors ${product.is_featured ? 'text-amber-500 dark:text-amber-400' : 'text-[var(--color-text-tertiary)] hover:text-amber-400'}`}
                         title={product.is_featured ? 'Remove from featured' : 'Mark as featured'}
                       >
                         <Star className="w-4 h-4" fill={product.is_featured ? 'currentColor' : 'none'} />
@@ -188,7 +188,7 @@ export default function AdminProducts() {
                           </Link>
                           <button
                             onClick={() => handleDelete(product.id)}
-                            className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-600 w-full transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 w-full transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>

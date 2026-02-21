@@ -74,7 +74,7 @@ export function WhyGadgetBD() {
               className="group p-6 md:p-8 rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)]/40 hover:border-[var(--color-border)] hover:shadow-[var(--shadow-md)] transition-all"
             >
               <div className="w-12 h-12 rounded-xl bg-[var(--color-accent-subtle)] border border-[var(--color-border)]/50 flex items-center justify-center mb-5 group-hover:bg-[var(--color-accent)] group-hover:border-transparent transition-colors">
-                <feature.icon className="w-5 h-5 group-hover:text-[var(--color-bg)] transition-colors" />
+                <feature.icon className="w-5 h-5 group-hover:text-[var(--color-accent-text)] transition-colors" />
               </div>
               <h3 className="text-base font-semibold mb-2">{feature.title}</h3>
               <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">

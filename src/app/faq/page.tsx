@@ -90,7 +90,7 @@ export default function FaqPage() {
               onClick={() => { setActiveCategory(c); setOpenIndex(null) }}
               className={`px-4 py-1.5 text-sm rounded-full border transition-colors ${
                 activeCategory === c
-                  ? 'bg-[var(--color-accent)] text-white border-[var(--color-accent)]'
+                  ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)] border-[var(--color-accent)]'
                   : 'border-[var(--color-border)] hover:bg-[var(--color-bg-alt)]'
               }`}
             >
@@ -142,7 +142,7 @@ export default function FaqPage() {
           </p>
           <a
             href="/support"
-            className="inline-flex px-6 py-2.5 bg-[var(--color-accent)] text-white rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+            className="inline-flex px-6 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
           >
             Contact Support
           </a>

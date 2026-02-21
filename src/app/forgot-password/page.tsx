@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
             animate="visible"
             className="text-center p-8 bg-[var(--color-bg-card)] rounded-2xl border border-[var(--color-border)]/50"
           >
-            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-50 flex items-center justify-center">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-green-50 dark:bg-green-950/30 flex items-center justify-center">
               <CheckCircle2 className="w-7 h-7 text-[var(--color-success)]" />
             </div>
             <h1 className="text-xl font-bold mb-2">Check your email</h1>
@@ -102,15 +102,15 @@ export default function ForgotPasswordPage() {
               />
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-red-600 dark:text-red-400">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-[var(--color-accent)] text-white rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-[var(--color-accent-text)]/30 border-t-[var(--color-accent-text)] rounded-full animate-spin" />
               ) : (
                 'Send Reset Link'
               )}

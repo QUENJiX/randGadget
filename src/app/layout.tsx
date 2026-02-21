@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { AuthProvider } from '@/components/auth'
 import { StorefrontShell } from '@/components/layout/storefront-shell'
+import { ThemeProvider } from '@/components/layout/theme-provider'
 import './globals.css'
 
 const geistSans = Geist({
@@ -45,12 +46,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('gadgetbd-theme');var d=t==='dark'||(t!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(d)document.documentElement.classList.add('dark')}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <StorefrontShell>{children}</StorefrontShell>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <StorefrontShell>{children}</StorefrontShell>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

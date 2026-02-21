@@ -71,12 +71,12 @@ export function AccountDashboard() {
 
   const statusColor = (status: string) => {
     switch (status) {
-      case 'delivered': return 'text-green-600 bg-green-50 dark:bg-green-950/30'
+      case 'delivered': return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/30'
       case 'shipped':
-      case 'out_for_delivery': return 'text-blue-600 bg-blue-50 dark:bg-blue-950/30'
+      case 'out_for_delivery': return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30'
       case 'cancelled':
-      case 'returned': return 'text-red-600 bg-red-50 dark:bg-red-950/30'
-      default: return 'text-orange-600 bg-orange-50 dark:bg-orange-950/30'
+      case 'returned': return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30'
+      default: return 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30'
     }
   }
 
@@ -91,7 +91,7 @@ export function AccountDashboard() {
           className="flex items-center gap-5 mb-10"
         >
           <div className="w-16 h-16 bg-[var(--color-accent)] rounded-2xl flex items-center justify-center shrink-0">
-            <span className="text-2xl font-bold text-[var(--color-bg)]">
+            <span className="text-2xl font-bold text-[var(--color-accent-text)]">
               {displayName[0].toUpperCase()}
             </span>
           </div>
@@ -157,7 +157,7 @@ export function AccountDashboard() {
               </p>
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-accent)] text-[var(--color-bg)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
               >
                 Start Shopping
               </Link>

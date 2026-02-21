@@ -81,28 +81,28 @@ export default function AdminDashboard() {
       label: 'Total Revenue',
       value: formatPrice(stats.revenue),
       icon: DollarSign,
-      color: 'text-green-600 bg-green-50',
+      color: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30',
       href: '/admin/analytics',
     },
     {
       label: 'Orders Today',
       value: stats.ordersToday.toString(),
       icon: ShoppingCart,
-      color: 'text-blue-600 bg-blue-50',
+      color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/30',
       href: '/admin/orders',
     },
     {
       label: 'Active Products',
       value: stats.totalProducts.toString(),
       icon: Package,
-      color: 'text-indigo-600 bg-indigo-50',
+      color: 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30',
       href: '/admin/products',
     },
     {
       label: 'Customers',
       value: stats.totalCustomers.toString(),
       icon: Users,
-      color: 'text-amber-600 bg-amber-50',
+      color: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/30',
       href: '/admin/customers',
     },
   ]
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
                     <p className="text-sm font-medium">{formatPrice(order.total)}</p>
                     <span
                       className={`inline-block text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                        orderStatusColors[order.status] || 'text-stone-600 bg-stone-50'
+                        orderStatusColors[order.status] || 'text-slate-600 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/30'
                       }`}
                     >
                       {orderStatusLabels[order.status] || order.status}
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
                 >
                   <p className="text-sm font-medium truncate">{product.name}</p>
                   <p className="text-xs mt-0.5">
-                    <span className={`font-medium ${product.stock <= 0 ? 'text-red-600' : 'text-amber-600'}`}>
+                    <span className={`font-medium ${product.stock <= 0 ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400'}`}>
                       {product.stock <= 0 ? 'Out of stock' : `${product.stock} left`}
                     </span>
                     <span className="text-[var(--color-text-tertiary)]"> · {formatPrice(product.price)}</span>

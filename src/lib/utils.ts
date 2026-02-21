@@ -81,14 +81,14 @@ export const orderStatusLabels: Record<string, string> = {
 }
 
 export const orderStatusColors: Record<string, string> = {
-  pending: 'text-amber-600 bg-amber-50',
-  confirmed: 'text-blue-600 bg-blue-50',
-  processing: 'text-indigo-600 bg-indigo-50',
-  shipped: 'text-cyan-600 bg-cyan-50',
-  out_for_delivery: 'text-teal-600 bg-teal-50',
-  delivered: 'text-green-600 bg-green-50',
-  cancelled: 'text-red-600 bg-red-50',
-  returned: 'text-stone-600 bg-stone-50',
+  pending: 'text-amber-600 bg-amber-50 dark:text-amber-400 dark:bg-amber-950/30',
+  confirmed: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-950/30',
+  processing: 'text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-950/30',
+  shipped: 'text-cyan-600 bg-cyan-50 dark:text-cyan-400 dark:bg-cyan-950/30',
+  out_for_delivery: 'text-teal-600 bg-teal-50 dark:text-teal-400 dark:bg-teal-950/30',
+  delivered: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30',
+  cancelled: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30',
+  returned: 'text-slate-600 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/30',
 }
 
 // --- Image helpers ---

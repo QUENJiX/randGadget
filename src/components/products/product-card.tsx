@@ -68,7 +68,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 </span>
               )}
               {product.is_featured && (
-                <span className="px-2 py-0.5 bg-[var(--color-accent)] text-[var(--color-bg)] text-[10px] font-semibold rounded-md">
+                <span className="px-2 py-0.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-[10px] font-semibold rounded-md">
                   Featured
                 </span>
               )}
@@ -77,13 +77,13 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             {/* Quick actions */}
             <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
               <button
-                className="w-9 h-9 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl flex items-center justify-center shadow-sm hover:bg-[var(--color-accent)] hover:text-[var(--color-bg)] hover:border-transparent transition-colors"
+                className="w-9 h-9 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl flex items-center justify-center shadow-sm hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-text)] hover:border-transparent transition-colors"
                 aria-label="Add to wishlist"
               >
                 <Heart className="w-4 h-4" />
               </button>
               <button
-                className="w-9 h-9 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl flex items-center justify-center shadow-sm hover:bg-[var(--color-accent)] hover:text-[var(--color-bg)] hover:border-transparent transition-colors"
+                className="w-9 h-9 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl flex items-center justify-center shadow-sm hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-text)] hover:border-transparent transition-colors"
                 aria-label="Quick add to cart"
               >
                 <ShoppingBag className="w-4 h-4" />

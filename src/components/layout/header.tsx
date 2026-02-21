@@ -10,11 +10,14 @@ import {
   Menu,
   X,
   Heart,
-  ChevronDown,
   LogOut,
+  Sun,
+  Moon,
+  Package,
 } from 'lucide-react'
 import { useCartStore, useSearchStore } from '@/lib/store'
 import { useAuth } from '@/components/auth'
+import { useTheme } from '@/components/layout/theme-provider'
 import { navbarSlide, mobileMenuOverlay, mobileMenuPanel, fadeDown } from '@/lib/animations'
 
 const navLinks = [
@@ -33,6 +36,7 @@ export function Header() {
   const itemCount = useCartStore((s) => s.getItemCount())
   const openSearch = useSearchStore((s) => s.open)
   const { user, loading: authLoading, signOut } = useAuth()
+  const { resolvedTheme, setTheme } = useTheme()
 
   // Track scroll for header background
   useEffect(() => {
@@ -81,7 +85,7 @@ export function Header() {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0">
               <div className="w-8 h-8 bg-[var(--color-accent)] rounded-lg flex items-center justify-center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-bg)]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-accent-text)]">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                   <path d="M2 17l10 5 10-5"/>
                   <path d="M2 12l10 5 10-5"/>
@@ -103,13 +107,12 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
-              <button
-                aria-label="More navigation"
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors rounded-lg hover:bg-[var(--color-accent-subtle)]"
+              <Link
+                href="/products"
+                className="px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors rounded-lg hover:bg-[var(--color-accent-subtle)]"
               >
-                More
-                <ChevronDown className="w-3.5 h-3.5" />
-              </button>
+                All Products
+              </Link>
             </nav>
 
             {/* Actions */}
@@ -120,6 +123,18 @@ export function Header() {
                 aria-label="Search products"
               >
                 <Search className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                className="p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                aria-label="Toggle theme"
+              >
+                {resolvedTheme === 'dark' ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )}
               </button>
 
               <Link
@@ -139,7 +154,7 @@ export function Header() {
                     aria-label="User menu"
                   >
                     <div className="w-5 h-5 bg-[var(--color-accent)] rounded-full flex items-center justify-center">
-                      <span className="text-[10px] font-bold text-[var(--color-bg)]">
+                      <span className="text-[10px] font-bold text-[var(--color-accent-text)]">
                         {(user.user_metadata?.full_name || user.email || '?')[0].toUpperCase()}
                       </span>
                     </div>
@@ -192,7 +207,7 @@ export function Header() {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[var(--color-accent)] text-[var(--color-bg)] text-[10px] font-semibold rounded-full flex items-center justify-center"
+                    className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-[10px] font-semibold rounded-full flex items-center justify-center"
                   >
                     {itemCount > 9 ? '9+' : itemCount}
                   </motion.span>
@@ -258,6 +273,19 @@ export function Header() {
                     </Link>
                   </motion.div>
                 ))}
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navLinks.length * 0.05, duration: 0.3 }}
+                >
+                  <Link
+                    href="/products"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-3 py-3 px-4 text-base font-semibold text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)] rounded-xl transition-colors"
+                  >
+                    <Package className="w-4 h-4" /> All Products
+                  </Link>
+                </motion.div>
                 <div className="pt-6 mt-6 border-t border-[var(--color-border)] space-y-1">
                   {user ? (
                     <>

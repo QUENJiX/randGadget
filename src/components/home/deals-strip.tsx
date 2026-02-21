@@ -40,7 +40,7 @@ export function DealsStrip() {
       })
   }, [])
   return (
-    <section className="py-20 md:py-28 bg-[var(--color-accent)] text-[var(--color-bg)]">
+    <section className="py-20 md:py-28 bg-gradient-to-br from-teal-600 to-emerald-700 dark:from-teal-900 dark:to-emerald-950 text-white">
       <div className="container-wide">
         <motion.div
           variants={fadeUp}

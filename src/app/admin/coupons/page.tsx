@@ -137,7 +137,7 @@ export default function AdminCoupons() {
         </div>
         <button
           onClick={() => { setShowForm(true); setEditId(null); setForm(empty) }}
-          className="px-4 py-2.5 bg-[var(--color-accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] flex items-center gap-2 transition-colors"
+          className="px-4 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] flex items-center gap-2 transition-colors"
         >
           <Plus className="w-4 h-4" /> New Coupon
         </button>
@@ -217,7 +217,7 @@ export default function AdminCoupons() {
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, is_active: !form.is_active })}
-                  className={`mt-1 inline-flex items-center gap-2 text-sm font-medium ${form.is_active ? 'text-green-600' : 'text-[var(--color-text-tertiary)]'}`}
+                  className={`mt-1 inline-flex items-center gap-2 text-sm font-medium ${form.is_active ? 'text-green-600 dark:text-green-400' : 'text-[var(--color-text-tertiary)]'}`}
                 >
                   {form.is_active ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
                   {form.is_active ? 'Active' : 'Inactive'}
@@ -246,7 +246,7 @@ export default function AdminCoupons() {
             <div className="flex items-center gap-3 pt-2">
               <button
                 onClick={handleSave}
-                className="px-5 py-2.5 bg-[var(--color-accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] flex items-center gap-2 transition-colors"
+                className="px-5 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] flex items-center gap-2 transition-colors"
               >
                 <Check className="w-4 h-4" /> Save
               </button>
@@ -332,15 +332,15 @@ export default function AdminCoupons() {
                       <td className="px-5 py-3">
                         <button onClick={() => toggleActive(c)} className="group">
                           {c.is_active && !isExpired ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full group-hover:bg-green-100 transition-colors">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-950/30 px-2.5 py-1 rounded-full group-hover:bg-green-100 dark:group-hover:bg-green-900/40 transition-colors">
                               <ToggleRight className="w-3.5 h-3.5" /> Active
                             </span>
                           ) : isExpired ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 px-2.5 py-1 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-950/30 px-2.5 py-1 rounded-full">
                               Expired
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-stone-500 bg-stone-50 px-2.5 py-1 rounded-full group-hover:bg-stone-100 transition-colors">
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 bg-slate-50 dark:text-slate-400 dark:bg-slate-800/30 px-2.5 py-1 rounded-full group-hover:bg-slate-100 dark:group-hover:bg-slate-700/40 transition-colors">
                               <ToggleLeft className="w-3.5 h-3.5" /> Inactive
                             </span>
                           )}
@@ -356,7 +356,7 @@ export default function AdminCoupons() {
                           </button>
                           <button
                             onClick={() => handleDelete(c.id)}
-                            className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-red-500 dark:text-red-400 transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

@@ -26,11 +26,11 @@ export default function NewProduct() {
   useEffect(() => {
     const supabase = createClient()
     if (!supabase) return
-    supabase.from('categories').select('id, name').order('name').then(({ data, error }) => {
+    supabase.from('categories').select('id, name').order('name').then(({ data, error }: { data: any; error: any }) => {
       if (error) console.error('Failed to load categories:', error.message)
       if (data) setCategories(data)
     })
-    supabase.from('brands').select('id, name').order('name').then(({ data, error }) => {
+    supabase.from('brands').select('id, name').order('name').then(({ data, error }: { data: any; error: any }) => {
       if (error) console.error('Failed to load brands:', error.message)
       if (data) setBrands(data)
     })
@@ -365,16 +365,16 @@ export default function NewProduct() {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">{error}</div>
+              <div className="p-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">{error}</div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-[var(--color-accent)] text-white rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {loading ? (
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-[var(--color-accent-text)]/30 border-t-[var(--color-accent-text)] rounded-full animate-spin" />
               ) : (
                 <>
                   <Save className="w-4 h-4" />

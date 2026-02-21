@@ -92,7 +92,7 @@ export default function WishlistPage() {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-white rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors"
             >
               Start Shopping
             </Link>
@@ -151,7 +151,7 @@ export default function WishlistPage() {
                           <span className="text-xs text-[var(--color-text-tertiary)] line-through">
                             {formatPrice(product.compare_price)}
                           </span>
-                          <span className="text-xs text-red-600 font-medium">-{discount}%</span>
+                          <span className="text-xs text-red-600 dark:text-red-400 font-medium">-{discount}%</span>
                         </>
                       )}
                     </div>
@@ -161,14 +161,14 @@ export default function WishlistPage() {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => addToCart(product)}
-                      className="p-2 rounded-xl bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] transition-colors"
+                      className="p-2 rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-text)] hover:bg-[var(--color-accent-hover)] transition-colors"
                       title="Add to cart"
                     >
                       <ShoppingBag className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => removeFromWishlist(product.id)}
-                      className="p-2 rounded-xl border border-[var(--color-border)] hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-colors"
+                      className="p-2 rounded-xl border border-[var(--color-border)] hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                       title="Remove from wishlist"
                     >
                       <Trash2 className="w-4 h-4" />

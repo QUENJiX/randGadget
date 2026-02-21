@@ -167,7 +167,7 @@ export default function AdminCategories() {
                 </button>
                 <button
                   onClick={() => handleDelete(cat.id)}
-                  className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-red-500 dark:text-red-400 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -189,7 +189,7 @@ export default function AdminCategories() {
         </div>
         <button
           onClick={() => setAddingNew(true)}
-          className="px-4 py-2.5 bg-[var(--color-accent)] text-white rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] flex items-center gap-2 transition-colors"
+          className="px-4 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] flex items-center gap-2 transition-colors"
         >
           <Plus className="w-4 h-4" /> Add Category
         </button>

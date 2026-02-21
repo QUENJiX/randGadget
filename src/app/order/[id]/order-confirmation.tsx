@@ -41,12 +41,12 @@ export function OrderConfirmation({ order }: OrderConfirmationProps) {
 
   const statusColor = (status: string) => {
     switch (status) {
-      case 'delivered': return 'text-green-600'
+      case 'delivered': return 'text-green-600 dark:text-green-400'
       case 'shipped':
-      case 'out_for_delivery': return 'text-blue-600'
+      case 'out_for_delivery': return 'text-blue-600 dark:text-blue-400'
       case 'cancelled':
-      case 'returned': return 'text-red-600'
-      default: return 'text-orange-600'
+      case 'returned': return 'text-red-600 dark:text-red-400'
+      default: return 'text-orange-600 dark:text-orange-400'
     }
   }
 
@@ -66,7 +66,7 @@ export function OrderConfirmation({ order }: OrderConfirmationProps) {
             transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
             className="w-16 h-16 mx-auto mb-5 bg-green-100 dark:bg-green-950/40 rounded-2xl flex items-center justify-center"
           >
-            <CheckCircle className="w-8 h-8 text-green-600" />
+            <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
           </motion.div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2">
             Order Placed Successfully!
@@ -222,7 +222,7 @@ export function OrderConfirmation({ order }: OrderConfirmationProps) {
               <span className="text-[var(--color-text-secondary)]">Delivery</span>
               <span className="font-medium">
                 {order.delivery_charge === 0 ? (
-                  <span className="text-green-600">Free</span>
+                  <span className="text-green-600 dark:text-green-400">Free</span>
                 ) : (
                   formatPrice(order.delivery_charge)
                 )}
@@ -231,7 +231,7 @@ export function OrderConfirmation({ order }: OrderConfirmationProps) {
             {order.discount > 0 && (
               <div className="flex justify-between">
                 <span className="text-[var(--color-text-secondary)]">Discount</span>
-                <span className="font-medium text-green-600">
+                <span className="font-medium text-green-600 dark:text-green-400">
                   −{formatPrice(order.discount)}
                 </span>
               </div>
@@ -271,7 +271,7 @@ export function OrderConfirmation({ order }: OrderConfirmationProps) {
         >
           <Link
             href="/"
-            className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 bg-[var(--color-accent)] text-[var(--color-bg)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
+            className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
           >
             Continue Shopping
             <ArrowRight className="w-4 h-4" />

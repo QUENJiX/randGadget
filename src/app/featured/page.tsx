@@ -50,7 +50,7 @@ export default function FeaturedPage() {
     <div className="pt-28 pb-20">
       <div className="container-wide">
         <motion.div variants={fadeUp} initial="hidden" animate="visible" className="mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-semibold uppercase tracking-wider mb-3">
             <Star className="w-3.5 h-3.5" /> Handpicked
           </div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Featured Products</h1>
@@ -77,13 +77,13 @@ export default function FeaturedPage() {
             <div className="hidden sm:flex items-center border border-[var(--color-border)] rounded-lg overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-[var(--color-accent)] text-white' : 'hover:bg-[var(--color-bg-alt)]'}`}
+                className={`p-2 transition-colors ${viewMode === 'grid' ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)]' : 'hover:bg-[var(--color-bg-alt)]'}`}
               >
                 <Grid3X3 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-[var(--color-accent)] text-white' : 'hover:bg-[var(--color-bg-alt)]'}`}
+                className={`p-2 transition-colors ${viewMode === 'list' ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)]' : 'hover:bg-[var(--color-bg-alt)]'}`}
               >
                 <LayoutList className="w-4 h-4" />
               </button>

@@ -194,7 +194,7 @@ export function CheckoutFlow() {
                 disabled={!isDone}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[var(--color-accent)] text-[var(--color-bg)]'
+                    ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)]'
                     : isDone
                     ? 'bg-[var(--color-accent-subtle)] text-[var(--color-text)] cursor-pointer'
                     : 'bg-[var(--color-surface)] text-[var(--color-text-tertiary)] cursor-default'
@@ -536,7 +536,7 @@ export function CheckoutFlow() {
               <button
                 onClick={nextStep}
                 disabled={!canAdvance()}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue
                 <ChevronRight className="w-4 h-4" />
@@ -545,10 +545,10 @@ export function CheckoutFlow() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={orderLoading}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-bg)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {orderLoading ? (
-                  <span className="w-4 h-4 border-2 border-[var(--color-bg)]/30 border-t-[var(--color-bg)] rounded-full animate-spin" />
+                  <span className="w-4 h-4 border-2 border-[var(--color-accent-text)]/30 border-t-[var(--color-accent-text)] rounded-full animate-spin" />
                 ) : (
                   <Check className="w-4 h-4" />
                 )}

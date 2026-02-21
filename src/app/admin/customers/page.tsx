@@ -183,8 +183,8 @@ export default function AdminCustomers() {
                     <td className="px-5 py-3">
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
                         c.role === 'admin'
-                          ? 'bg-purple-50 text-purple-600'
-                          : 'bg-stone-50 text-stone-600'
+                          ? 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400'
+                          : 'bg-slate-50 text-slate-600 dark:bg-slate-800/30 dark:text-slate-400'
                       }`}>
                         {c.role}
                       </span>
