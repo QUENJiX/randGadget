@@ -1,0 +1,6 @@
+export { HeroSection } from './hero-section'
+export { CategoryBento } from './category-bento'
+export { FeaturedShowcase } from './featured-showcase'
+export { WhyGadgetBD } from './why-gadgetbd'
+export { DealsStrip } from './deals-strip'
+export { NewsletterCTA } from './newsletter-cta'
