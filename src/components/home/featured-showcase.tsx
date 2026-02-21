@@ -22,6 +22,7 @@ export function FeaturedShowcase() {
       .select('*, brand:brands(*), category:categories(*), images:product_images(*)')
       .eq('is_featured', true)
       .eq('is_active', true)
+      .order('created_at', { ascending: false })
       .limit(3)
       .then(({ data }: { data: any }) => {
         if (data) setFeaturedProducts(data as Product[])

@@ -135,7 +135,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
               {product.name}
             </motion.h1>
 
-            {/* Rating placeholder */}
+            {/* Rating — only shown when real reviews exist */}
+            {product.review_count != null && product.review_count > 0 && (
             <motion.div variants={staggerItem} className="flex items-center gap-3 mb-5">
               <div className="flex items-center gap-0.5">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -143,7 +144,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                     key={i}
                     className={cn(
                       'w-4 h-4',
-                      i <= 4
+                      i <= Math.round(product.avg_rating ?? 0)
                         ? 'fill-amber-400 text-amber-400'
                         : 'text-[var(--color-border)]'
                     )}
@@ -151,9 +152,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
                 ))}
               </div>
               <span className="text-sm text-[var(--color-text-secondary)]">
-                4.0 (12 reviews)
+                {(product.avg_rating ?? 0).toFixed(1)} ({product.review_count} {product.review_count === 1 ? 'review' : 'reviews'})
               </span>
             </motion.div>
+            )}
 
             {/* Price */}
             <motion.div variants={staggerItem} className="flex items-baseline gap-3 mb-6">

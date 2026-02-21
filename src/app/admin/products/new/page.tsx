@@ -26,10 +26,12 @@ export default function NewProduct() {
   useEffect(() => {
     const supabase = createClient()
     if (!supabase) return
-    supabase.from('categories').select('id, name').order('name').then(({ data }: { data: any }) => {
+    supabase.from('categories').select('id, name').order('name').then(({ data, error }) => {
+      if (error) console.error('Failed to load categories:', error.message)
       if (data) setCategories(data)
     })
-    supabase.from('brands').select('id, name').order('name').then(({ data }: { data: any }) => {
+    supabase.from('brands').select('id, name').order('name').then(({ data, error }) => {
+      if (error) console.error('Failed to load brands:', error.message)
       if (data) setBrands(data)
     })
   }, [])
@@ -106,7 +108,13 @@ export default function NewProduct() {
         sort_order: i,
         is_primary: img.is_primary,
       }))
-      await supabase.from('product_images').insert(imageRows)
+      const { error: imgError } = await supabase.from('product_images').insert(imageRows)
+      if (imgError) {
+        console.error('Failed to save product images:', imgError.message)
+        setError(`Product created but images failed to save: ${imgError.message}`)
+        setLoading(false)
+        return
+      }
     }
 
     router.push('/admin/products')

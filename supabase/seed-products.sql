@@ -18,7 +18,8 @@ INSERT INTO brands (name, slug, logo_url) VALUES
   ('JBL',        'jbl',        NULL),
   ('Baseus',     'baseus',     NULL),
   ('Lenovo',     'lenovo',     NULL),
-  ('ASUS',       'asus',       NULL);
+  ('ASUS',       'asus',       NULL)
+ON CONFLICT (name) DO NOTHING;
 
 -- =========================================================================
 -- CATEGORIES
@@ -31,7 +32,8 @@ INSERT INTO categories (name, slug, sort_order) VALUES
   ('Accessories',   'accessories',   5),
   ('Tablets',       'tablets',       6),
   ('Gaming',        'gaming',        7),
-  ('Power & Cables','power-cables',  8);
+  ('Power & Cables','power-cables',  8)
+ON CONFLICT (slug) DO NOTHING;
 
 -- =========================================================================
 -- PRODUCTS
@@ -50,28 +52,32 @@ VALUES (
   189999, 199999, 170000, 15, 0.227, true,
   ARRAY['5G', 'A18 Pro', '48MP Fusion', 'Titanium', 'USB-C'],
   '{"Display": "6.9\" Super Retina XDR OLED", "Chip": "A18 Pro", "Camera": "48MP Fusion + 48MP Ultra Wide + 12MP Telephoto", "Battery": "Up to 33 hours video playback", "Storage": "256GB", "RAM": "8GB", "OS": "iOS 18", "Connectivity": "5G, Wi-Fi 7, Bluetooth 5.3", "Port": "USB-C (USB 3)", "Water Resistance": "IP68"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 -- Variants for iPhone 16 Pro Max
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Natural Titanium', 'AAPL-IP16PM-256-NT', 189999, 8,
   '{"color": "Natural Titanium", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'AAPL-IP16PM-256';
+FROM products p WHERE p.sku = 'AAPL-IP16PM-256'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Desert Titanium', 'AAPL-IP16PM-256-DT', 189999, 5,
   '{"color": "Desert Titanium", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'AAPL-IP16PM-256';
+FROM products p WHERE p.sku = 'AAPL-IP16PM-256'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Black Titanium', 'AAPL-IP16PM-256-BT', 189999, 2,
   '{"color": "Black Titanium", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'AAPL-IP16PM-256';
+FROM products p WHERE p.sku = 'AAPL-IP16PM-256'
+ON CONFLICT (sku) DO NOTHING;
 
 -- Placeholder image
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'iPhone 16 Pro Max', 0, true
-FROM products p WHERE p.sku = 'AAPL-IP16PM-256';
+FROM products p WHERE p.sku = 'AAPL-IP16PM-256'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 2. Samsung Galaxy S25 Ultra
@@ -87,21 +93,24 @@ VALUES (
   164999, 174999, 140000, 20, 0.218, true,
   ARRAY['Galaxy AI', 'Snapdragon 8 Elite', '200MP', 'S Pen', '5G'],
   '{"Display": "6.8\" Dynamic AMOLED 2X", "Chip": "Snapdragon 8 Elite", "Camera": "200MP + 50MP + 10MP + 12MP", "Battery": "5000mAh", "Storage": "256GB", "RAM": "12GB", "OS": "One UI 7 / Android 15", "Connectivity": "5G, Wi-Fi 7", "S Pen": "Included", "Water Resistance": "IP68"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Titanium Black', 'SAM-S25U-256-TB', 164999, 10,
   '{"color": "Titanium Black", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'SAM-S25U-256';
+FROM products p WHERE p.sku = 'SAM-S25U-256'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Titanium Gray', 'SAM-S25U-256-TG', 164999, 10,
   '{"color": "Titanium Gray", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'SAM-S25U-256';
+FROM products p WHERE p.sku = 'SAM-S25U-256'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Samsung Galaxy S25 Ultra', 0, true
-FROM products p WHERE p.sku = 'SAM-S25U-256';
+FROM products p WHERE p.sku = 'SAM-S25U-256'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 3. MacBook Air 15" M3
@@ -117,21 +126,24 @@ VALUES (
   179999, NULL, 155000, 8, 1.51, true,
   ARRAY['M3 Chip', '18hr Battery', 'Liquid Retina', 'Fanless'],
   '{"Display": "15.3\" Liquid Retina", "Chip": "Apple M3", "GPU": "10-core", "Memory": "8GB Unified", "Storage": "256GB SSD", "Battery": "Up to 18 hours", "Weight": "1.51 kg", "Ports": "2x Thunderbolt, MagSafe, headphone jack", "Camera": "1080p FaceTime HD"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Midnight', 'AAPL-MBA15-M3-MN', 179999, 4,
   '{"color": "Midnight", "memory": "8GB", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'AAPL-MBA15-M3';
+FROM products p WHERE p.sku = 'AAPL-MBA15-M3'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Starlight', 'AAPL-MBA15-M3-SL', 179999, 4,
   '{"color": "Starlight", "memory": "8GB", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'AAPL-MBA15-M3';
+FROM products p WHERE p.sku = 'AAPL-MBA15-M3'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'MacBook Air 15 M3', 0, true
-FROM products p WHERE p.sku = 'AAPL-MBA15-M3';
+FROM products p WHERE p.sku = 'AAPL-MBA15-M3'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 4. Sony WH-1000XM5
@@ -147,11 +159,12 @@ VALUES (
   32999, 41999, 25000, 25, 0.250, false,
   ARRAY['ANC', 'LDAC', '30hr Battery', 'Multipoint'],
   '{"Type": "Over-ear Wireless", "Driver": "30mm", "ANC": "Auto NC Optimizer", "Battery": "30 hours", "Bluetooth": "5.2", "Codec": "LDAC, AAC, SBC", "Weight": "250g", "Mic": "8 microphones", "Quick Charge": "3 min = 3 hours"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Sony WH-1000XM5', 0, true
-FROM products p WHERE p.sku = 'SONY-WH1000XM5';
+FROM products p WHERE p.sku = 'SONY-WH1000XM5'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 5. Google Pixel Watch 3
@@ -167,11 +180,12 @@ VALUES (
   44999, 52999, 35000, 12, 0.031, false,
   ARRAY['Wear OS', 'Fitbit', 'Google AI', 'AMOLED'],
   '{"Display": "1.2\" AMOLED", "Chip": "Qualcomm SW5100", "OS": "Wear OS 5", "Battery": "Up to 24 hours", "Water Resistance": "5 ATM", "Sensors": "Heart rate, SpO2, Skin temperature", "Connectivity": "Bluetooth 5.3, Wi-Fi, NFC"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Google Pixel Watch 3', 0, true
-FROM products p WHERE p.sku = 'GOOG-PW3';
+FROM products p WHERE p.sku = 'GOOG-PW3'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 6. Nothing Ear (a)
@@ -187,11 +201,12 @@ VALUES (
   6999, 8999, 4500, 40, 0.005, false,
   ARRAY['ANC', 'Hi-Res', 'Transparent Design', '42.5hr Battery'],
   '{"Type": "In-ear TWS", "Driver": "11mm", "ANC": "Up to 45dB", "Battery": "9.5 hours (42.5 with case)", "Bluetooth": "5.3", "Codec": "LDAC, AAC, SBC", "Water Resistance": "IP54", "Weight": "4.8g per earbud"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Nothing Ear (a)', 0, true
-FROM products p WHERE p.sku = 'NTNG-EARA';
+FROM products p WHERE p.sku = 'NTNG-EARA'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 7. Anker 737 Power Bank
@@ -207,11 +222,12 @@ VALUES (
   8499, 11999, 6000, 30, 0.640, false,
   ARRAY['140W', '24000mAh', 'USB-C PD', 'Laptop Charging'],
   '{"Capacity": "24,000mAh / 86.4Wh", "Max Output": "140W USB-C", "Ports": "2x USB-C, 1x USB-A", "Display": "Smart digital display", "Weight": "640g", "Input": "140W USB-C", "Recharge Time": "58 min (0-80%)"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Anker 737 Power Bank', 0, true
-FROM products p WHERE p.sku = 'ANKR-737PB';
+FROM products p WHERE p.sku = 'ANKR-737PB'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 8. Apple AirPods Pro 2
@@ -227,11 +243,12 @@ VALUES (
   34999, 39999, 28000, 18, 0.006, false,
   ARRAY['ANC', 'H2 Chip', 'Adaptive Audio', 'USB-C'],
   '{"Type": "In-ear TWS", "Chip": "Apple H2", "ANC": "2x more active noise cancellation", "Battery": "6 hours (30 with case)", "Connector": "USB-C", "Audio": "Adaptive Audio, Spatial Audio", "Water Resistance": "IP54", "Weight": "5.3g per earbud"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Apple AirPods Pro 2', 0, true
-FROM products p WHERE p.sku = 'AAPL-APP2-USBC';
+FROM products p WHERE p.sku = 'AAPL-APP2-USBC'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 9. OnePlus 13
@@ -247,21 +264,24 @@ VALUES (
   109999, 119999, 85000, 15, 0.213, false,
   ARRAY['Snapdragon 8 Elite', 'Hasselblad', '100W Charging', '5G'],
   '{"Display": "6.82\" LTPO AMOLED, 120Hz", "Chip": "Snapdragon 8 Elite", "Camera": "50MP + 50MP + 50MP Hasselblad", "Battery": "6000mAh", "Charging": "100W wired, 50W wireless", "Storage": "256GB", "RAM": "12GB", "OS": "OxygenOS 15 / Android 15"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Midnight Ocean', 'OP-13-256-MO', 109999, 8,
   '{"color": "Midnight Ocean", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'OP-13-256';
+FROM products p WHERE p.sku = 'OP-13-256'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_variants (product_id, name, sku, price, stock, attributes)
 SELECT p.id, 'Arctic Dawn', 'OP-13-256-AD', 109999, 7,
   '{"color": "Arctic Dawn", "storage": "256GB"}'::jsonb
-FROM products p WHERE p.sku = 'OP-13-256';
+FROM products p WHERE p.sku = 'OP-13-256'
+ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'OnePlus 13', 0, true
-FROM products p WHERE p.sku = 'OP-13-256';
+FROM products p WHERE p.sku = 'OP-13-256'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 10. Xiaomi 14 Ultra
@@ -277,11 +297,12 @@ VALUES (
   129999, 149999, 100000, 10, 0.225, false,
   ARRAY['Leica', 'Snapdragon 8 Gen 3', '1-inch Sensor', '90W'],
   '{"Display": "6.73\" 2K LTPO AMOLED", "Chip": "Snapdragon 8 Gen 3", "Camera": "50MP 1-inch Leica + 50MP + 50MP + 50MP", "Battery": "5300mAh", "Charging": "90W wired, 50W wireless", "Storage": "512GB", "RAM": "16GB"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Xiaomi 14 Ultra', 0, true
-FROM products p WHERE p.sku = 'XM-14U-512';
+FROM products p WHERE p.sku = 'XM-14U-512'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 11. JBL Tune 770NC
@@ -297,11 +318,12 @@ VALUES (
   9999, 12999, 7000, 35, 0.225, false,
   ARRAY['ANC', 'JBL Pure Bass', '70hr Battery', 'Foldable'],
   '{"Type": "Over-ear Wireless", "Driver": "40mm", "ANC": "Adaptive Noise Cancelling", "Battery": "70 hours (44 with ANC)", "Bluetooth": "5.3", "Codec": "AAC, SBC", "Weight": "225g", "Foldable": "Yes"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'JBL Tune 770NC', 0, true
-FROM products p WHERE p.sku = 'JBL-T770NC';
+FROM products p WHERE p.sku = 'JBL-T770NC'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 12. Samsung Galaxy Tab S9 FE
@@ -317,11 +339,12 @@ VALUES (
   44999, 49999, 35000, 14, 0.523, false,
   ARRAY['S Pen', 'IP68', 'One UI', 'DeX'],
   '{"Display": "10.9\" TFT LCD", "Chip": "Exynos 1380", "RAM": "6GB", "Storage": "128GB + microSD", "Battery": "8000mAh", "S Pen": "Included", "Water Resistance": "IP68", "OS": "One UI 6 / Android 14"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Samsung Galaxy Tab S9 FE', 0, true
-FROM products p WHERE p.sku = 'SAM-TABS9FE';
+FROM products p WHERE p.sku = 'SAM-TABS9FE'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 13. Baseus 65W GaN Charger
@@ -337,11 +360,12 @@ VALUES (
   3499, 4999, 2200, 50, 0.120, false,
   ARRAY['65W', 'GaN', 'USB-C PD', 'Compact'],
   '{"Max Output": "65W", "Ports": "2x USB-C + 1x USB-A", "Technology": "GaN5 Pro", "Weight": "120g", "Input": "100-240V AC", "PD Compatibility": "PD 3.0, QC 5.0, PPS"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Baseus 65W GaN Charger', 0, true
-FROM products p WHERE p.sku = 'BASE-65WGAN';
+FROM products p WHERE p.sku = 'BASE-65WGAN'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 14. Lenovo IdeaPad Slim 5
@@ -357,11 +381,12 @@ VALUES (
   79999, 89999, 65000, 6, 1.46, false,
   ARRAY['Ryzen 7', '16GB RAM', 'OLED', '512GB SSD'],
   '{"Display": "14\" 2.8K OLED", "Processor": "AMD Ryzen 7 7730U", "RAM": "16GB DDR5", "Storage": "512GB NVMe SSD", "Battery": "Up to 14 hours", "Weight": "1.46 kg", "OS": "Windows 11 Home", "Ports": "USB-C, USB-A, HDMI, SD card"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Lenovo IdeaPad Slim 5', 0, true
-FROM products p WHERE p.sku = 'LNV-IPS5-14';
+FROM products p WHERE p.sku = 'LNV-IPS5-14'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 15. ASUS ROG Ally X
@@ -377,11 +402,12 @@ VALUES (
   89999, 99999, 72000, 5, 0.678, false,
   ARRAY['Z1 Extreme', '120Hz', '24GB RAM', 'Handheld'],
   '{"Display": "7\" FHD 120Hz IPS", "Chip": "AMD Z1 Extreme", "RAM": "24GB LPDDR5X", "Storage": "1TB NVMe SSD", "Battery": "80Wh", "OS": "Windows 11", "Weight": "678g", "Controls": "Full gamepad + gyroscope"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'ASUS ROG Ally X', 0, true
-FROM products p WHERE p.sku = 'ASUS-ROGAX';
+FROM products p WHERE p.sku = 'ASUS-ROGAX'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 16. Samsung Galaxy Buds3 Pro
@@ -397,11 +423,12 @@ VALUES (
   24999, 29999, 18000, 22, 0.005, false,
   ARRAY['ANC', 'Galaxy AI', '2-Way Speaker', 'Hi-Res'],
   '{"Type": "In-ear TWS", "Driver": "10.5mm + 6.1mm planar", "ANC": "Galaxy AI Adaptive ANC", "Battery": "7 hours (30 with case)", "Bluetooth": "5.4", "Codec": "SSC HiFi, AAC, SBC", "Water Resistance": "IP57", "Weight": "5.4g per earbud"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Samsung Galaxy Buds3 Pro', 0, true
-FROM products p WHERE p.sku = 'SAM-GB3PRO';
+FROM products p WHERE p.sku = 'SAM-GB3PRO'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 17. Google Pixel 9 Pro
@@ -417,11 +444,12 @@ VALUES (
   124999, 134999, 95000, 10, 0.199, false,
   ARRAY['Tensor G4', 'Google AI', '7yr Updates', '50MP'],
   '{"Display": "6.3\" LTPO OLED, 120Hz", "Chip": "Google Tensor G4", "Camera": "50MP + 48MP ultrawide + 48MP telephoto", "Battery": "4700mAh", "Storage": "128GB", "RAM": "16GB", "OS": "Android 15", "Updates": "7 years guaranteed"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Google Pixel 9 Pro', 0, true
-FROM products p WHERE p.sku = 'GOOG-P9PRO';
+FROM products p WHERE p.sku = 'GOOG-P9PRO'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 18. Anker Soundcore Space A40
@@ -437,11 +465,12 @@ VALUES (
   5999, 7999, 3800, 45, 0.005, false,
   ARRAY['ANC', 'Hi-Res', 'LDAC', '50hr Battery'],
   '{"Type": "In-ear TWS", "Driver": "10mm", "ANC": "Adaptive ANC", "Battery": "10 hours (50 with case)", "Bluetooth": "5.2", "Codec": "LDAC, AAC, SBC", "Water Resistance": "IPX4", "Weight": "4.9g per earbud"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Anker Soundcore Space A40', 0, true
-FROM products p WHERE p.sku = 'ANKR-SCA40';
+FROM products p WHERE p.sku = 'ANKR-SCA40'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 19. Xiaomi Smart Band 9
@@ -457,11 +486,12 @@ VALUES (
   3499, 4499, 2200, 60, 0.016, false,
   ARRAY['AMOLED', '21-day Battery', '150+ Sports', 'Heart Rate'],
   '{"Display": "1.62\" AMOLED", "Battery": "Up to 21 days", "Sensors": "Heart rate, SpO2, accelerometer", "Sports": "150+ modes", "Water Resistance": "5 ATM", "Weight": "15.8g (without band)", "Connectivity": "Bluetooth 5.4"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Xiaomi Smart Band 9', 0, true
-FROM products p WHERE p.sku = 'XM-BAND9';
+FROM products p WHERE p.sku = 'XM-BAND9'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');
 
 
 -- 20. Baseus USB-C to USB-C Cable 100W
@@ -477,8 +507,9 @@ VALUES (
   799, 1299, 400, 80, 0.065, false,
   ARRAY['100W', 'USB-C', 'Braided Nylon', '2m'],
   '{"Length": "2 meters", "Max Power": "100W (20V/5A)", "Data Transfer": "480Mbps", "Material": "Braided nylon, zinc alloy", "Compatibility": "USB-C PD devices", "Warranty": "18 months"}'::jsonb
-);
+) ON CONFLICT (sku) DO NOTHING;
 
 INSERT INTO product_images (product_id, url, alt_text, sort_order, is_primary)
 SELECT p.id, '/placeholder-product.svg', 'Baseus 100W USB-C Cable', 0, true
-FROM products p WHERE p.sku = 'BASE-C2C100W';
+FROM products p WHERE p.sku = 'BASE-C2C100W'
+AND NOT EXISTS (SELECT 1 FROM product_images pi WHERE pi.product_id = p.id AND pi.url = '/placeholder-product.svg');

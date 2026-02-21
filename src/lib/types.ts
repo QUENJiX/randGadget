@@ -77,6 +77,9 @@ export interface Product {
   images?: ProductImage[]
   variants?: ProductVariant[]
   primary_image?: string
+  // Aggregated review stats (may be populated via views/RPCs)
+  avg_rating?: number | null
+  review_count?: number | null
 }
 
 export interface ProductImage {

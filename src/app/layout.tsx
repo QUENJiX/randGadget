@@ -1,13 +1,8 @@
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Header, Footer } from '@/components/layout'
 import { AuthProvider } from '@/components/auth'
+import { StorefrontShell } from '@/components/layout/storefront-shell'
 import './globals.css'
-
-const SearchModal = dynamic(
-  () => import('@/components/search/search-modal').then((m) => m.SearchModal)
-)
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -54,16 +49,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[var(--color-accent)] focus:text-white focus:rounded-lg focus:outline-none"
-          >
-            Skip to content
-          </a>
-          <Header />
-          <SearchModal />
-          <main id="main-content" className="min-h-screen">{children}</main>
-          <Footer />
+          <StorefrontShell>{children}</StorefrontShell>
         </AuthProvider>
       </body>
     </html>
