@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
+import { motion, AnimatePresence, useScroll } from 'framer-motion'
 import {
   Search,
   ShoppingBag,
@@ -15,10 +15,10 @@ import {
   Moon,
   Package,
 } from 'lucide-react'
-import { useCartStore, useSearchStore } from '@/lib/store'
+import { useCartStore, useSearchStore, useWishlistStore } from '@/lib/store'
 import { useAuth } from '@/components/auth'
 import { useTheme } from '@/components/layout/theme-provider'
-import { navbarSlide, mobileMenuOverlay, mobileMenuPanel, fadeDown } from '@/lib/animations'
+import { navbarSlide, mobileMenuOverlay, mobileMenuPanel } from '@/lib/animations'
 
 const navLinks = [
   { label: 'Smartphones', href: '/category/smartphones' },
@@ -34,19 +34,18 @@ export function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const { scrollY } = useScroll()
   const itemCount = useCartStore((s) => s.getItemCount())
+  const wishlistCount = useWishlistStore((s) => s.ids.length)
   const openSearch = useSearchStore((s) => s.open)
   const { user, loading: authLoading, signOut } = useAuth()
   const { resolvedTheme, setTheme } = useTheme()
 
-  // Track scroll for header background
   useEffect(() => {
     const unsubscribe = scrollY.on('change', (y) => {
-      setScrolled(y > 32)
+      setScrolled(y > 8)
     })
     return unsubscribe
   }, [scrollY])
 
-  // Lock body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -58,14 +57,14 @@ export function Header() {
         variants={navbarSlide}
         initial="hidden"
         animate="visible"
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow] duration-200 ${
           scrolled
-            ? 'bg-[var(--color-bg)]/95 backdrop-blur-xl border-b border-[var(--color-border)]'
-            : 'bg-transparent'
+            ? 'bg-[var(--color-bg)] shadow-[var(--shadow-md)] border-b border-[var(--color-border)]'
+            : 'bg-[var(--color-bg)]'
         }`}
       >
-        {/* Top bar */}
-        <div className="hidden md:block border-b border-[var(--color-border)]/50">
+        {/* Top announcement bar */}
+        <div className="hidden md:block border-b border-[var(--color-border)]">
           <div className="container-wide flex items-center justify-between py-1.5 text-xs text-[var(--color-text-tertiary)]">
             <span>Free delivery inside Dhaka on orders over ৳5,000</span>
             <div className="flex items-center gap-4">
@@ -81,7 +80,7 @@ export function Header() {
 
         {/* Main nav */}
         <div className="container-wide">
-          <div className="flex items-center justify-between h-16 md:h-[72px]">
+          <div className="flex items-center justify-between h-14 md:h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 shrink-0">
               <div className="w-8 h-8 bg-[var(--color-accent)] rounded-lg flex items-center justify-center">
@@ -97,29 +96,29 @@ export function Header() {
             </Link>
 
             {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-0.5">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors rounded-lg hover:bg-[var(--color-accent-subtle)]"
+                  className="px-3 py-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors"
                 >
                   {link.label}
                 </Link>
               ))}
               <Link
                 href="/products"
-                className="px-3 py-2 text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] transition-colors rounded-lg hover:bg-[var(--color-accent-subtle)]"
+                className="ml-1 px-3 py-2 text-sm font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors"
               >
                 All Products
               </Link>
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5">
               <button
                 onClick={openSearch}
-                className="p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                 aria-label="Search products"
               >
                 <Search className="w-5 h-5" />
@@ -127,7 +126,7 @@ export function Header() {
 
               <button
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-                className="p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                 aria-label="Toggle theme"
               >
                 {resolvedTheme === 'dark' ? (
@@ -139,10 +138,15 @@ export function Header() {
 
               <Link
                 href="/wishlist"
-                className="hidden sm:flex p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                className="hidden sm:flex relative p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                 aria-label="Wishlist"
               >
                 <Heart className="w-5 h-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-semibold rounded-full flex items-center justify-center">
+                    {wishlistCount > 9 ? '9+' : wishlistCount}
+                  </span>
+                )}
               </Link>
 
               {/* Account / User menu */}
@@ -150,7 +154,7 @@ export function Header() {
                 <div className="relative hidden sm:block">
                   <button
                     onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                    className="p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                     aria-label="User menu"
                   >
                     <div className="w-5 h-5 bg-[var(--color-accent)] rounded-full flex items-center justify-center">
@@ -162,15 +166,15 @@ export function Header() {
                   {userMenuOpen && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                      <div className="absolute right-0 top-12 z-50 w-56 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-xl">
-                        <div className="px-4 py-2 border-b border-[var(--color-border)]">
+                      <div className="absolute right-0 top-11 z-50 w-52 py-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-lg)]">
+                        <div className="px-3 py-2 border-b border-[var(--color-border)]">
                           <p className="text-sm font-medium truncate">{user.user_metadata?.full_name || 'User'}</p>
                           <p className="text-xs text-[var(--color-text-tertiary)] truncate">{user.email}</p>
                         </div>
                         <Link
                           href="/account"
                           onClick={() => setUserMenuOpen(false)}
-                          className="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-[var(--color-surface)] transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[var(--color-surface)] transition-colors"
                         >
                           <User className="w-4 h-4" /> My Account
                         </Link>
@@ -179,7 +183,7 @@ export function Header() {
                             setUserMenuOpen(false)
                             await signOut()
                           }}
-                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-[var(--color-error)] hover:bg-[var(--color-surface)] transition-colors"
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm text-[var(--color-error)] hover:bg-[var(--color-surface)] transition-colors"
                         >
                           <LogOut className="w-4 h-4" /> Sign Out
                         </button>
@@ -190,7 +194,7 @@ export function Header() {
               ) : (
                 <Link
                   href="/account"
-                  className="hidden sm:flex p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                  className="hidden sm:flex p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                   aria-label="Account"
                 >
                   <User className="w-5 h-5" />
@@ -199,25 +203,21 @@ export function Header() {
 
               <Link
                 href="/cart"
-                className="relative p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                className="relative p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                 aria-label="Cart"
               >
                 <ShoppingBag className="w-5 h-5" />
                 {itemCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-[10px] font-semibold rounded-full flex items-center justify-center"
-                  >
+                  <span className="absolute -top-0.5 -right-0.5 w-[18px] h-[18px] bg-[var(--color-accent)] text-[var(--color-accent-text)] text-[10px] font-semibold rounded-full flex items-center justify-center">
                     {itemCount > 9 ? '9+' : itemCount}
-                  </motion.span>
+                  </span>
                 )}
               </Link>
 
               {/* Mobile menu toggle */}
               <button
                 onClick={() => setMobileOpen(true)}
-                className="lg:hidden p-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors ml-1"
+                className="lg:hidden p-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors ml-0.5"
                 aria-label="Open menu"
               >
                 <Menu className="w-5 h-5" />
@@ -237,62 +237,51 @@ export function Header() {
               animate="visible"
               exit="exit"
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-[60] bg-black/40"
+              className="fixed inset-0 z-[60] bg-black/30"
             />
             <motion.div
               variants={mobileMenuPanel}
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="fixed top-0 right-0 bottom-0 z-[70] w-[85vw] max-w-sm bg-[var(--color-bg)] shadow-2xl"
+              className="fixed top-0 right-0 bottom-0 z-[70] w-[80vw] max-w-xs bg-[var(--color-bg)] shadow-[var(--shadow-xl)]"
             >
-              <div className="flex items-center justify-between px-6 h-16 border-b border-[var(--color-border)]">
-                <span className="font-semibold text-lg">Menu</span>
+              <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--color-border)]">
+                <span className="font-semibold">Menu</span>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="p-2 rounded-xl hover:bg-[var(--color-accent-subtle)]"
+                  className="p-2 rounded-lg hover:bg-[var(--color-surface)]"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <nav className="p-6 space-y-1">
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.href}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.3 }}
-                  >
-                    <Link
-                      href={link.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center py-3 px-4 text-base font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-accent-subtle)] rounded-xl transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </motion.div>
-                ))}
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: navLinks.length * 0.05, duration: 0.3 }}
-                >
+              <nav className="p-4 space-y-0.5">
+                {navLinks.map((link) => (
                   <Link
-                    href="/products"
+                    key={link.href}
+                    href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-3 px-4 text-base font-semibold text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)] rounded-xl transition-colors"
+                    className="flex items-center py-2.5 px-3 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface)] rounded-lg transition-colors"
                   >
-                    <Package className="w-4 h-4" /> All Products
+                    {link.label}
                   </Link>
-                </motion.div>
-                <div className="pt-6 mt-6 border-t border-[var(--color-border)] space-y-1">
+                ))}
+                <Link
+                  href="/products"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 py-2.5 px-3 text-sm font-medium text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)] rounded-lg transition-colors"
+                >
+                  <Package className="w-4 h-4" /> All Products
+                </Link>
+
+                <div className="pt-4 mt-4 border-t border-[var(--color-border)] space-y-0.5">
                   {user ? (
                     <>
                       <Link
                         href="/account"
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 py-3 px-4 text-sm rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                        className="flex items-center gap-2 py-2.5 px-3 text-sm rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                       >
                         <User className="w-4 h-4" /> My Account
                       </Link>
@@ -301,7 +290,7 @@ export function Header() {
                           setMobileOpen(false)
                           await signOut()
                         }}
-                        className="w-full flex items-center gap-3 py-3 px-4 text-sm text-[var(--color-error)] rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                        className="w-full flex items-center gap-2 py-2.5 px-3 text-sm text-[var(--color-error)] rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                       >
                         <LogOut className="w-4 h-4" /> Sign Out
                       </button>
@@ -310,7 +299,7 @@ export function Header() {
                     <Link
                       href="/account"
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 py-3 px-4 text-sm rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                      className="flex items-center gap-2 py-2.5 px-3 text-sm rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                     >
                       <User className="w-4 h-4" /> Sign In
                     </Link>
@@ -318,14 +307,14 @@ export function Header() {
                   <Link
                     href="/wishlist"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-3 px-4 text-sm rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                    className="flex items-center gap-2 py-2.5 px-3 text-sm rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                   >
                     <Heart className="w-4 h-4" /> Wishlist
                   </Link>
                   <Link
                     href="/track-order"
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 py-3 px-4 text-sm rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors"
+                    className="flex items-center gap-2 py-2.5 px-3 text-sm rounded-lg hover:bg-[var(--color-surface)] transition-colors"
                   >
                     <Search className="w-4 h-4" /> Track Order
                   </Link>

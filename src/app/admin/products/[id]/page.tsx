@@ -1,40 +1,86 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Plus, X, Upload, ImageIcon, Star } from 'lucide-react'
+import { ArrowLeft, Save, Plus, X, Upload, Star, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { imageUrl } from '@/lib/utils'
+import type { Product } from '@/lib/types'
 
 interface CategoryOption { id: number; name: string }
 interface BrandOption { id: number; name: string }
 
-export default function NewProduct() {
+export default function EditProduct({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params)
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
   const [error, setError] = useState('')
   const [categories, setCategories] = useState<CategoryOption[]>([])
   const [brands, setBrands] = useState<BrandOption[]>([])
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
   const [specs, setSpecs] = useState<{ key: string; value: string }[]>([{ key: '', value: '' }])
-  const [images, setImages] = useState<{ path: string; is_primary: boolean }[]>([])
+  const [images, setImages] = useState<{ id?: string; path: string; is_primary: boolean }[]>([])
   const [uploading, setUploading] = useState(false)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [categoryId, setCategoryId] = useState<string>('')
+  const [brandId, setBrandId] = useState<string>('')
 
+  // Load product, categories, brands
   useEffect(() => {
     const supabase = createClient()
-    if (!supabase) return
-    supabase.from('categories').select('id, name').order('name').then(({ data, error }: { data: any; error: any }) => {
-      if (error) console.error('Failed to load categories:', error.message)
+    if (!supabase) {
+      // Defer state update to avoid synchronous setState in effect body
+      queueMicrotask(() => setFetching(false))
+      return
+    }
+
+    // Load reference data
+    supabase.from('categories').select('id, name').order('name').then(({ data }: { data: CategoryOption[] | null }) => {
       if (data) setCategories(data)
     })
-    supabase.from('brands').select('id, name').order('name').then(({ data, error }: { data: any; error: any }) => {
-      if (error) console.error('Failed to load brands:', error.message)
+    supabase.from('brands').select('id, name').order('name').then(({ data }: { data: BrandOption[] | null }) => {
       if (data) setBrands(data)
     })
-  }, [])
+
+    // Load product
+    supabase
+      .from('products')
+      .select('*, images:product_images(*)')
+      .eq('id', id)
+      .single()
+      .then(({ data, error: fetchErr }: { data: Record<string, unknown> | null; error: { message: string } | null }) => {
+        if (fetchErr || !data) {
+          setError('Product not found.')
+          setFetching(false)
+          return
+        }
+        const p = data as unknown as Product
+        setProduct(p)
+        setTags(p.tags ?? [])
+        setCategoryId(p.category_id?.toString() ?? '')
+        setBrandId(p.brand_id?.toString() ?? '')
+
+        // Populate specs
+        if (p.specs && Object.keys(p.specs).length > 0) {
+          setSpecs(Object.entries(p.specs).map(([key, value]) => ({ key, value })))
+        }
+
+        // Populate images
+        if (p.images && p.images.length > 0) {
+          setImages(
+            [...p.images]
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map((img) => ({ id: img.id, path: img.url, is_primary: img.is_primary }))
+          )
+        }
+
+        setFetching(false)
+      })
+  }, [id])
 
   const addTag = () => {
     const t = tagInput.trim().toLowerCase()
@@ -49,15 +95,17 @@ export default function NewProduct() {
 
     const form = new FormData(e.currentTarget)
     const name = form.get('name') as string
-    const slug = name.toLowerCase().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/^-+|-+$/g, '')
+    const slugInput = (form.get('slug') as string || '').trim()
+    // Preserve existing slug unless the user explicitly changed it
+    const slug = slugInput || product!.slug
     const sku = form.get('sku') as string
     const price = Number(form.get('price'))
     const compare_price = Number(form.get('compare_price')) || null
     const cost_price = Number(form.get('cost_price')) || null
     const stock = Number(form.get('stock')) || 0
     const weight_kg = Number(form.get('weight_kg')) || 0
-    const category_id = Number(form.get('category_id')) || null
-    const brand_id = Number(form.get('brand_id')) || null
+    const category_id = categoryId ? Number(categoryId) : null
+    const brand_id = brandId ? Number(brandId) : null
     const short_desc = (form.get('short_desc') as string) || null
     const description = (form.get('description') as string) || null
     const is_featured = form.get('is_featured') === 'on'
@@ -75,7 +123,7 @@ export default function NewProduct() {
     const supabase = createClient()
     if (!supabase) { setError('Supabase not configured.'); setLoading(false); return }
 
-    const { error: dbError, data: inserted } = await supabase.from('products').insert({
+    const { error: dbError, count } = await supabase.from('products').update({
       name,
       slug,
       sku,
@@ -92,7 +140,7 @@ export default function NewProduct() {
       is_active,
       tags,
       specs: specsObj,
-    }).select('id').single()
+    }).eq('id', id)
 
     if (dbError) {
       setError(dbError.message)
@@ -100,24 +148,55 @@ export default function NewProduct() {
       return
     }
 
-    // Insert product images
-    if (inserted && images.length > 0) {
+    if (count === 0) {
+      setError('Update failed — you may not have permission to edit products. Please sign in as an admin.')
+      setLoading(false)
+      return
+    }
+
+    // Sync product images: delete existing, re-insert current set
+    const { error: delError } = await supabase.from('product_images').delete().eq('product_id', id)
+    if (delError) {
+      setError(`Product updated but images could not be synced: ${delError.message}`)
+      setLoading(false)
+      return
+    }
+
+    if (images.length > 0) {
       const imageRows = images.map((img, i) => ({
-        product_id: inserted.id,
+        product_id: id,
         url: img.path,
         sort_order: i,
         is_primary: img.is_primary,
       }))
       const { error: imgError } = await supabase.from('product_images').insert(imageRows)
       if (imgError) {
-        console.error('Failed to save product images:', imgError.message)
-        setError(`Product created but images failed to save: ${imgError.message}`)
+        setError(`Product updated but images failed to save: ${imgError.message}`)
         setLoading(false)
         return
       }
     }
 
     router.push('/admin/products')
+  }
+
+  if (fetching) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="w-6 h-6 animate-spin text-[var(--color-text-tertiary)]" />
+      </div>
+    )
+  }
+
+  if (!product) {
+    return (
+      <div className="py-12 text-center">
+        <p className="text-[var(--color-text-secondary)]">Product not found.</p>
+        <Link href="/admin/products" className="text-sm text-[var(--color-accent)] hover:underline mt-2 inline-block">
+          Back to products
+        </Link>
+      </div>
+    )
   }
 
   return (
@@ -129,71 +208,80 @@ export default function NewProduct() {
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to products
         </Link>
-        <h1 className="text-xl font-bold tracking-tight">Add Product</h1>
+        <h1 className="text-xl font-bold tracking-tight">Edit Product</h1>
+        <p className="text-sm text-[var(--color-text-secondary)] mt-0.5">{product.name}</p>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main info */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]/50 p-5 space-y-4">
+            <div className="bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)] p-5 space-y-4">
               <h2 className="font-semibold text-sm">Basic Info</h2>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Product Name *</label>
-                <input name="name" required className="admin-input" placeholder="e.g. iPhone 16 Pro Max — 256GB" />
+                <input name="name" required defaultValue={product.name} className="admin-input" placeholder="e.g. iPhone 16 Pro Max — 256GB" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">URL Slug</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[var(--color-text-tertiary)] shrink-0">/product/</span>
+                  <input name="slug" defaultValue={product.slug} className="admin-input font-mono" placeholder="auto-generated-from-name" />
+                </div>
+                <p className="text-xs text-[var(--color-text-tertiary)] mt-1">Leave unchanged to keep the current URL. Changing this will break existing links.</p>
               </div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1.5">SKU *</label>
-                  <input name="sku" required className="admin-input font-mono" placeholder="e.g. IPH16PM-256" />
+                  <input name="sku" required defaultValue={product.sku} className="admin-input font-mono" placeholder="e.g. IPH16PM-256" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Weight (kg)</label>
-                  <input name="weight_kg" type="number" step="0.01" className="admin-input" placeholder="0.23" />
+                  <input name="weight_kg" type="number" step="0.01" defaultValue={product.weight_kg || ''} className="admin-input" placeholder="0.23" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Short Description</label>
-                <input name="short_desc" className="admin-input" placeholder="One-line summary" />
+                <input name="short_desc" defaultValue={product.short_desc ?? ''} className="admin-input" placeholder="One-line summary" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Full Description</label>
-                <textarea name="description" rows={5} className="admin-input resize-none" placeholder="Detailed product description…" />
+                <textarea name="description" rows={5} defaultValue={product.description ?? ''} className="admin-input resize-none" placeholder="Detailed product description…" />
               </div>
             </div>
 
             {/* Pricing */}
-            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]/50 p-5 space-y-4">
+            <div className="bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)] p-5 space-y-4">
               <h2 className="font-semibold text-sm">Pricing & Stock</h2>
               <div className="grid sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Price (৳) *</label>
-                  <input name="price" type="number" required className="admin-input" placeholder="189999" />
+                  <input name="price" type="number" required defaultValue={product.price} className="admin-input" placeholder="189999" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Compare Price (৳)</label>
-                  <input name="compare_price" type="number" className="admin-input" placeholder="199999" />
+                  <input name="compare_price" type="number" defaultValue={product.compare_price ?? ''} className="admin-input" placeholder="199999" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1.5">Cost Price (৳)</label>
-                  <input name="cost_price" type="number" className="admin-input" placeholder="170000" />
+                  <input name="cost_price" type="number" defaultValue={product.cost_price ?? ''} className="admin-input" placeholder="170000" />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Stock</label>
-                <input name="stock" type="number" className="admin-input" placeholder="100" defaultValue="0" />
+                <input name="stock" type="number" defaultValue={product.stock} className="admin-input" placeholder="100" />
               </div>
             </div>
 
             {/* Images */}
-            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]/50 p-5 space-y-4">
+            <div className="bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)] p-5 space-y-4">
               <h2 className="font-semibold text-sm">Product Images</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {images.map((img, i) => (
-                  <div key={img.path} className="relative aspect-square rounded-lg overflow-hidden border border-[var(--color-border)]/50 group">
+                  <div key={img.path} className="relative aspect-square rounded-lg overflow-hidden border border-[var(--color-border)] group">
                     <Image
                       src={imageUrl(img.path)}
-                      alt={`Upload ${i + 1}`}
+                      alt={`Image ${i + 1}`}
                       fill
                       sizes="200px"
                       className="object-cover"
@@ -272,7 +360,7 @@ export default function NewProduct() {
             </div>
 
             {/* Specs */}
-            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]/50 p-5 space-y-4">
+            <div className="bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)] p-5 space-y-4">
               <h2 className="font-semibold text-sm">Specifications</h2>
               {specs.map((spec, i) => (
                 <div key={i} className="flex gap-2">
@@ -307,18 +395,18 @@ export default function NewProduct() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]/50 p-5 space-y-4">
+            <div className="bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)] p-5 space-y-4">
               <h2 className="font-semibold text-sm">Organization</h2>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Category</label>
-                <select name="category_id" className="admin-input">
+                <select name="category_id" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="admin-input">
                   <option value="">Select category</option>
                   {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Brand</label>
-                <select name="brand_id" className="admin-input">
+                <select name="brand_id" value={brandId} onChange={(e) => setBrandId(e.target.value)} className="admin-input">
                   <option value="">Select brand</option>
                   {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
                 </select>
@@ -352,14 +440,14 @@ export default function NewProduct() {
               </div>
             </div>
 
-            <div className="bg-[var(--color-bg-card)] rounded-xl border border-[var(--color-border)]/50 p-5 space-y-4">
+            <div className="bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)] p-5 space-y-4">
               <h2 className="font-semibold text-sm">Status</h2>
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" name="is_active" defaultChecked className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]" />
+                <input type="checkbox" name="is_active" defaultChecked={product.is_active} className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]" />
                 <span className="text-sm">Active (visible on store)</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" name="is_featured" className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]" />
+                <input type="checkbox" name="is_featured" defaultChecked={product.is_featured} className="w-4 h-4 rounded border-[var(--color-border)] accent-[var(--color-accent)]" />
                 <span className="text-sm">Featured product</span>
               </label>
             </div>
@@ -371,14 +459,14 @@ export default function NewProduct() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              className="w-full py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-medium hover:bg-[var(--color-accent-hover)] transition-colors shadow-[var(--shadow-sm)] disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span className="w-4 h-4 border-2 border-[var(--color-accent-text)]/30 border-t-[var(--color-accent-text)] rounded-full animate-spin" />
               ) : (
                 <>
                   <Save className="w-4 h-4" />
-                  Save Product
+                  Update Product
                 </>
               )}
             </button>

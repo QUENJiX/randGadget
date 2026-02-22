@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
 import { formatPrice, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
 import Link from 'next/link'
@@ -30,7 +30,7 @@ export function FeaturedShowcase() {
   }, [])
 
   return (
-    <section ref={sectionRef} className="py-20 md:py-28 bg-[var(--color-bg-alt)]">
+    <section ref={sectionRef} className="py-16 md:py-20">
       <div className="container-wide">
         {/* Header */}
         <motion.div
@@ -38,32 +38,30 @@ export function FeaturedShowcase() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="flex items-end justify-between mb-12"
+          className="flex items-end justify-between mb-10"
         >
           <div>
-            <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-[0.2em] mb-3">
+            <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-[0.15em] mb-2">
               Handpicked
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Featured this week
-            </h2>
+            <h2>Featured this week</h2>
           </div>
           <Link
             href="/featured"
-            className="hidden md:inline-flex items-center gap-2 text-sm font-medium hover:gap-3 transition-all group"
+            className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors"
           >
             View all
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </motion.div>
 
-        {/* Product showcase — editorial layout */}
+        {/* Product showcase */}
         <motion.div
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="space-y-6"
+          className="space-y-4"
         >
           {featuredProducts.map((product, index) => (
             <FeaturedProductRow
@@ -81,14 +79,14 @@ export function FeaturedShowcase() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="mt-10 md:hidden"
+          className="mt-8 md:hidden"
         >
           <Link
             href="/featured"
-            className="inline-flex items-center gap-2 text-sm font-medium"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)]"
           >
             View all featured
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </motion.div>
       </div>
@@ -105,78 +103,63 @@ function FeaturedProductRow({
   index: number
   reversed: boolean
 }) {
-  const rowRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({
-    target: rowRef,
-    offset: ['start end', 'end start'],
-  })
-  const imageY = useTransform(scrollYProgress, [0, 1], [30, -30])
-
   return (
-    <motion.div
-      ref={rowRef}
-      variants={staggerItem}
-    >
+    <motion.div variants={staggerItem}>
       <Link
         href={`/product/${product.slug}`}
         className={`group flex flex-col ${
           reversed ? 'md:flex-row-reverse' : 'md:flex-row'
-        } bg-[var(--color-bg-card)] border border-[var(--color-border)]/40 rounded-2xl overflow-hidden hover:shadow-[var(--shadow-lg)] hover:border-[var(--color-border)] transition-all`}
+        } bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg overflow-hidden hover:shadow-[var(--shadow-md)] transition-shadow duration-200`}
       >
         {/* Image area */}
-        <div className="relative md:w-1/2 aspect-[4/3] md:aspect-auto bg-[var(--color-surface)]/50 overflow-hidden">
-          <motion.div
-            style={{ y: imageY }}
-            className="absolute inset-0"
-          >
-            {(() => {
-              const src = productImageUrl(product)
-              return src ? (
-                <Image
-                  src={src}
-                  alt={product.name}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className="object-cover"
-                  placeholder="blur"
-                  blurDataURL={BLUR_PLACEHOLDER}
-                />
-              ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-32 h-32 md:w-40 md:h-40 mx-auto rounded-3xl bg-[var(--color-surface)] flex items-center justify-center shadow-inner">
-                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-[var(--color-text-tertiary)]/50">
-                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                        <line x1="12" y1="18" x2="12.01" y2="18" />
-                      </svg>
-                    </div>
-                    <p className="mt-4 text-xs text-[var(--color-text-tertiary)]">{product.brand?.name}</p>
+        <div className="relative md:w-1/2 aspect-[4/3] md:aspect-auto bg-[var(--color-bg-alt)] overflow-hidden">
+          {(() => {
+            const src = productImageUrl(product)
+            return src ? (
+              <Image
+                src={src}
+                alt={product.name}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                placeholder="blur"
+                blurDataURL={BLUR_PLACEHOLDER}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-28 h-28 md:w-36 md:h-36 mx-auto rounded-xl bg-[var(--color-surface)] flex items-center justify-center">
+                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-[var(--color-text-tertiary)]">
+                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                      <line x1="12" y1="18" x2="12.01" y2="18" />
+                    </svg>
                   </div>
+                  <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">{product.brand?.name}</p>
                 </div>
-              )
-            })()}
-          </motion.div>
+              </div>
+            )
+          })()}
         </div>
 
         {/* Content */}
-        <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center">
-          <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-[0.15em] mb-3">
+        <div className="md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
+          <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider mb-2">
             {product.brand?.name}
           </p>
-          <h3 className="text-2xl md:text-3xl font-bold tracking-tight mb-3 group-hover:text-[var(--color-accent)] transition-colors">
+          <h3 className="text-xl md:text-2xl font-bold tracking-tight mb-2 group-hover:text-[var(--color-accent)] transition-colors">
             {product.name}
           </h3>
-          <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-6 max-w-md">
+          <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-5 max-w-md">
             {product.short_desc}
           </p>
 
           {/* Tags */}
           {product.tags && product.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-1.5 mb-5">
               {product.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1 bg-[var(--color-accent-subtle)] border border-[var(--color-border)]/50 rounded-lg text-xs font-medium"
+                  className="px-2 py-0.5 bg-[var(--color-surface)] rounded text-xs font-medium text-[var(--color-text-secondary)]"
                 >
                   {tag}
                 </span>
@@ -185,8 +168,8 @@ function FeaturedProductRow({
           )}
 
           {/* Price */}
-          <div className="flex items-baseline gap-3">
-            <span className="text-2xl font-bold">{formatPrice(product.price)}</span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-xl font-bold">{formatPrice(product.price)}</span>
             {product.compare_price && (
               <span className="text-base text-[var(--color-text-tertiary)] line-through">
                 {formatPrice(product.compare_price)}
@@ -194,9 +177,9 @@ function FeaturedProductRow({
             )}
           </div>
 
-          <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[var(--color-text-secondary)] group-hover:text-[var(--color-text)] group-hover:gap-3 transition-all">
+          <div className="mt-5 flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)]">
             View details
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </div>
         </div>
       </Link>

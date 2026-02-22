@@ -138,7 +138,7 @@ export function SearchModal() {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="w-full max-w-2xl bg-[var(--color-bg-card)] rounded-2xl shadow-2xl border border-[var(--color-border)] overflow-hidden"
+              className="w-full max-w-2xl bg-[var(--color-bg-card)] rounded-lg shadow-[var(--shadow-lg)] border border-[var(--color-border)] overflow-hidden"
             >
               {/* Search input */}
               <div className="flex items-center gap-3 px-5 border-b border-[var(--color-border)]">
@@ -181,7 +181,7 @@ export function SearchModal() {
                             <button
                               key={term}
                               onClick={() => handleQueryChange(term)}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors text-left"
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[var(--color-surface)] transition-colors text-left"
                             >
                               <Clock className="w-4 h-4 text-[var(--color-text-tertiary)]" />
                               <span className="text-sm">{term}</span>
@@ -201,7 +201,7 @@ export function SearchModal() {
                           <button
                             key={term}
                             onClick={() => handleQueryChange(term)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-border)] rounded-full text-sm transition-colors"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-border)] rounded-md text-sm transition-colors"
                           >
                             <TrendingUp className="w-3 h-3 text-[var(--color-text-tertiary)]" />
                             {term}
@@ -214,7 +214,7 @@ export function SearchModal() {
                   <div className="p-5 space-y-3">
                     {[1, 2, 3].map((n) => (
                       <div key={n} className="flex items-center gap-4">
-                        <div className="w-16 h-16 skeleton rounded-xl" />
+                        <div className="w-16 h-16 skeleton rounded-lg" />
                         <div className="flex-1 space-y-2">
                           <div className="h-4 skeleton w-3/4 rounded" />
                           <div className="h-3 skeleton w-1/2 rounded" />
@@ -234,9 +234,9 @@ export function SearchModal() {
                         <Link
                           href={`/product/${product.slug}`}
                           onClick={close}
-                          className="flex items-center gap-4 p-3 rounded-xl hover:bg-[var(--color-accent-subtle)] transition-colors group"
+                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-[var(--color-surface)] transition-colors group"
                         >
-                          <div className="w-16 h-16 bg-[var(--color-surface)] rounded-xl overflow-hidden shrink-0 flex items-center justify-center">
+                          <div className="w-16 h-16 bg-[var(--color-surface)] rounded-lg overflow-hidden shrink-0 flex items-center justify-center">
                             <span className="text-xs text-[var(--color-text-tertiary)]">
                               {product.brand_name}
                             </span>
@@ -269,7 +269,7 @@ export function SearchModal() {
                     <Link
                       href={`/search?q=${encodeURIComponent(query)}`}
                       onClick={close}
-                      className="flex items-center justify-center gap-2 mt-2 py-3 text-sm font-medium text-[var(--color-accent)] hover:bg-[var(--color-accent-subtle)] rounded-xl transition-colors"
+                      className="flex items-center justify-center gap-2 mt-2 py-3 text-sm font-medium text-[var(--color-accent)] hover:bg-[var(--color-surface)] rounded-lg transition-colors"
                     >
                       View all results
                       <ArrowRight className="w-4 h-4" />

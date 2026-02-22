@@ -192,7 +192,7 @@ export function CheckoutFlow() {
               <button
                 onClick={() => isDone && setStep(s.id)}
                 disabled={!isDone}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   isActive
                     ? 'bg-[var(--color-accent)] text-[var(--color-accent-text)]'
                     : isDone
@@ -241,7 +241,7 @@ export function CheckoutFlow() {
                         value={address.full_name}
                         onChange={(e) => setAddress({ full_name: e.target.value })}
                         placeholder="Your full name"
-                        className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                        className="w-full px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                       />
                     </div>
                     <div>
@@ -253,7 +253,7 @@ export function CheckoutFlow() {
                         value={address.phone}
                         onChange={(e) => setAddress({ phone: e.target.value })}
                         placeholder="01XXXXXXXXX"
-                        className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                        className="w-full px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                       />
                     </div>
                   </div>
@@ -269,7 +269,7 @@ export function CheckoutFlow() {
                         onChange={(e) =>
                           setAddress({ division_id: Number(e.target.value) || null })
                         }
-                        className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                        className="w-full px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                       >
                         <option value="">Select Division</option>
                         {divisions.map((d) => (
@@ -289,7 +289,7 @@ export function CheckoutFlow() {
                           setAddress({ district_id: Number(e.target.value) || null })
                         }
                         disabled={!address.division_id}
-                        className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors disabled:opacity-50"
+                        className="w-full px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors disabled:opacity-50"
                       >
                         <option value="">Select District</option>
                         {districts.map((d) => (
@@ -312,7 +312,7 @@ export function CheckoutFlow() {
                         setAddress({ upazila_id: Number(e.target.value) || null })
                       }
                       disabled={!address.district_id}
-                      className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors disabled:opacity-50"
+                      className="w-full px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors disabled:opacity-50"
                     >
                       <option value="">Select Upazila</option>
                       {upazilas.map((u) => (
@@ -333,7 +333,7 @@ export function CheckoutFlow() {
                       onChange={(e) => setAddress({ street_address: e.target.value })}
                       placeholder="House no., Road, Area (e.g., House 12, Road 7, Block D, Bashundhara R/A)"
                       rows={3}
-                      className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors resize-none"
+                      className="w-full px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors resize-none"
                     />
                   </div>
 
@@ -347,7 +347,7 @@ export function CheckoutFlow() {
                       value={address.postal_code}
                       onChange={(e) => setAddress({ postal_code: e.target.value })}
                       placeholder="1229"
-                      className="w-full px-4 py-3 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                      className="w-full px-4 py-2.5 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                     />
                   </div>
 
@@ -356,7 +356,7 @@ export function CheckoutFlow() {
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center gap-3 p-4 rounded-xl bg-[var(--color-accent-subtle)] border border-[var(--color-border)]/50"
+                      className="flex items-center gap-3 p-4 rounded-lg bg-[var(--color-accent-subtle)] border border-[var(--color-border)]"
                     >
                       <Truck className="w-5 h-5 text-[var(--color-text-secondary)]" />
                       <div>
@@ -395,7 +395,7 @@ export function CheckoutFlow() {
                     <motion.label
                       key={option.method}
                       variants={staggerItem}
-                      className={`flex items-start gap-4 p-5 rounded-xl border cursor-pointer transition-all ${
+                      className={`flex items-start gap-3 p-4 rounded-lg border cursor-pointer transition-all ${
                         paymentMethod === option.method
                           ? 'border-[var(--color-accent)] bg-[var(--color-accent-subtle)]'
                           : 'border-[var(--color-border)] hover:border-[var(--color-text-tertiary)]'
@@ -432,7 +432,7 @@ export function CheckoutFlow() {
                 <h2 className="text-xl font-semibold mb-6">Order Review</h2>
 
                 {/* Address summary */}
-                <div className="p-5 rounded-xl border border-[var(--color-border)] mb-4">
+                <div className="p-4 rounded-lg border border-[var(--color-border)] mb-4">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm font-semibold">Shipping to</p>
                     <button
@@ -452,7 +452,7 @@ export function CheckoutFlow() {
                 </div>
 
                 {/* Payment summary */}
-                <div className="p-5 rounded-xl border border-[var(--color-border)] mb-4">
+                <div className="p-4 rounded-lg border border-[var(--color-border)] mb-4">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-sm font-semibold">Payment</p>
                     <button
@@ -468,7 +468,7 @@ export function CheckoutFlow() {
                 </div>
 
                 {/* Items */}
-                <div className="p-5 rounded-xl border border-[var(--color-border)]">
+                <div className="p-4 rounded-lg border border-[var(--color-border)]">
                   <p className="text-sm font-semibold mb-4">
                     Items ({cartItems.length})
                   </p>
@@ -523,7 +523,7 @@ export function CheckoutFlow() {
             {step !== 'address' ? (
               <button
                 onClick={prevStep}
-                className="inline-flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors"
+                className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg border border-[var(--color-border)] hover:bg-[var(--color-surface)] transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -536,7 +536,7 @@ export function CheckoutFlow() {
               <button
                 onClick={nextStep}
                 disabled={!canAdvance()}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-sm font-semibold rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors shadow-[var(--shadow-sm)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue
                 <ChevronRight className="w-4 h-4" />
@@ -545,7 +545,7 @@ export function CheckoutFlow() {
               <button
                 onClick={handlePlaceOrder}
                 disabled={orderLoading}
-                className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-sm font-semibold rounded-xl hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-sm font-semibold rounded-lg hover:bg-[var(--color-accent-hover)] transition-colors shadow-[var(--shadow-sm)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {orderLoading ? (
                   <span className="w-4 h-4 border-2 border-[var(--color-accent-text)]/30 border-t-[var(--color-accent-text)] rounded-full animate-spin" />
@@ -558,7 +558,7 @@ export function CheckoutFlow() {
           </div>
 
           {orderError && (
-            <div className="mt-4 p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
+            <div className="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
               {orderError}
             </div>
           )}
@@ -566,7 +566,7 @@ export function CheckoutFlow() {
 
         {/* Order summary sidebar */}
         <div className="lg:col-span-1">
-          <div className="sticky top-28 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+          <div className="sticky top-24 p-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-sm)]">
             <h3 className="text-base font-semibold mb-5">Order Summary</h3>
 
             <div className="space-y-3 text-sm">

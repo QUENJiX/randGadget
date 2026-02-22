@@ -7,27 +7,21 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
 import { formatPrice, calcDiscount, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
-import { useCartStore } from '@/lib/store'
+import { useCartStore, useWishlistStore } from '@/lib/store'
 import type { Product } from '@/lib/types'
-
-const WISHLIST_KEY = 'gadgetbd_wishlist'
-
-function getWishlistIds(): string[] {
-  if (typeof window === 'undefined') return []
-  try {
-    return JSON.parse(localStorage.getItem(WISHLIST_KEY) || '[]')
-  } catch { return [] }
-}
 
 export default function WishlistPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const addItem = useCartStore((s) => s.addItem)
+  const removeCartItem = useCartStore((s) => s.removeItem)
+  const cartItems = useCartStore((s) => s.items)
+  const wishlistIds = useWishlistStore((s) => s.ids)
+  const removeFromWishlist = useWishlistStore((s) => s.remove)
 
   const loadWishlist = useCallback(async () => {
     setLoading(true)
-    const ids = getWishlistIds()
-    if (ids.length === 0) { setProducts([]); setLoading(false); return }
+    if (wishlistIds.length === 0) { setProducts([]); setLoading(false); return }
 
     const { createClient } = await import('@/lib/supabase/client')
     const supabase = createClient()
@@ -36,29 +30,33 @@ export default function WishlistPage() {
     const { data } = await supabase
       .from('products')
       .select('*, brand:brands(*), category:categories(*), images:product_images(*)')
-      .in('id', ids)
+      .in('id', wishlistIds)
       .eq('is_active', true)
 
     if (data) setProducts(data as Product[])
     setLoading(false)
-  }, [])
+  }, [wishlistIds])
 
   useEffect(() => { loadWishlist() }, [loadWishlist])
 
-  const removeFromWishlist = (productId: string) => {
-    const ids = getWishlistIds().filter((id) => id !== productId)
-    localStorage.setItem(WISHLIST_KEY, JSON.stringify(ids))
+  const handleRemove = (productId: string) => {
+    removeFromWishlist(productId)
     setProducts((prev) => prev.filter((p) => p.id !== productId))
   }
 
-  const addToCart = (product: Product) => {
-    addItem({
-      id: product.id,
-      product_id: product.id,
-      variant_id: null,
-      quantity: 1,
-      product,
-    })
+  const toggleCart = (product: Product) => {
+    const inCart = cartItems.some((i) => i.product_id === product.id)
+    if (inCart) {
+      removeCartItem(product.id)
+    } else {
+      addItem({
+        id: product.id,
+        product_id: product.id,
+        variant_id: null,
+        quantity: 1,
+        product,
+      })
+    }
   }
 
   return (
@@ -159,15 +157,24 @@ export default function WishlistPage() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0">
+                    {(() => {
+                      const inCart = cartItems.some((i) => i.product_id === product.id)
+                      return (
+                        <button
+                          onClick={() => toggleCart(product)}
+                          className={`p-2 rounded-xl transition-colors ${
+                            inCart
+                              ? 'bg-green-600 text-white'
+                              : 'border border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-text)] hover:border-transparent'
+                          }`}
+                          title={inCart ? 'Added to cart' : 'Add to cart'}
+                        >
+                          <ShoppingBag className="w-4 h-4" />
+                        </button>
+                      )
+                    })()}
                     <button
-                      onClick={() => addToCart(product)}
-                      className="p-2 rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-text)] hover:bg-[var(--color-accent-hover)] transition-colors"
-                      title="Add to cart"
-                    >
-                      <ShoppingBag className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => removeFromWishlist(product.id)}
+                      onClick={() => handleRemove(product.id)}
                       className="p-2 rounded-xl border border-[var(--color-border)] hover:bg-red-50 dark:hover:bg-red-950/30 hover:border-red-200 dark:hover:border-red-800 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                       title="Remove from wishlist"
                     >

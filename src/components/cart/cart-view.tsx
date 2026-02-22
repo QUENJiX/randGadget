@@ -25,7 +25,7 @@ export function CartView() {
             animate="visible"
             className="max-w-md mx-auto text-center"
           >
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-[var(--color-surface)] flex items-center justify-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
               <ShoppingBag className="w-8 h-8 text-[var(--color-text-tertiary)]" />
             </div>
             <h1 className="text-2xl font-bold mb-3">Your cart is empty</h1>
@@ -35,7 +35,7 @@ export function CartView() {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-8 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
+              className="inline-flex items-center gap-2 px-7 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors shadow-[var(--shadow-sm)]"
             >
               Start Shopping
               <ArrowRight className="w-4 h-4" />
@@ -84,10 +84,10 @@ export function CartView() {
                   key={`${item.product_id}-${item.variant_id}`}
                   variants={staggerItem}
                   layout
-                  className="flex gap-5 p-5 rounded-2xl border border-[var(--color-border)]/50 bg-[var(--color-bg-card)]"
+                  className="flex gap-4 p-4 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)]"
                 >
                   {/* Image */}
-                  <div className="w-24 h-24 md:w-28 md:h-28 bg-[var(--color-bg-alt)] rounded-xl shrink-0 overflow-hidden relative">
+                  <div className="w-20 h-20 md:w-24 md:h-24 bg-[var(--color-bg-alt)] rounded-md shrink-0 overflow-hidden relative">
                     {(() => {
                       const src = productImageUrl(item.product)
                       return src ? (
@@ -128,7 +128,7 @@ export function CartView() {
 
                     {/* Quantity controls */}
                     <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center border border-[var(--color-border)] rounded-lg overflow-hidden">
+                      <div className="flex items-center border border-[var(--color-border)] rounded-md overflow-hidden">
                         <button
                           onClick={() =>
                             updateQuantity(
@@ -176,7 +176,7 @@ export function CartView() {
 
           {/* Summary */}
           <div>
-            <div className="sticky top-28 p-6 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+            <div className="sticky top-24 p-5 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-sm)]">
               <h3 className="text-base font-semibold mb-5">Order Summary</h3>
 
               <div className="space-y-3 text-sm mb-6">
@@ -200,7 +200,7 @@ export function CartView() {
 
               <Link
                 href="/checkout"
-                className="w-full inline-flex items-center justify-center gap-2 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors shadow-[var(--shadow-sm)]"
               >
                 Proceed to Checkout
                 <ArrowRight className="w-4 h-4" />
@@ -208,7 +208,7 @@ export function CartView() {
 
               <Link
                 href="/"
-                className="w-full inline-flex items-center justify-center gap-2 py-3 mt-3 border border-[var(--color-border)] rounded-xl text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 py-2.5 mt-2 border border-[var(--color-border)] rounded-lg text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Continue Shopping

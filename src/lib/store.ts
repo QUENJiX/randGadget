@@ -232,6 +232,51 @@ export const useCheckoutStore = create<CheckoutStore>((set) => ({
 }))
 
 /* ============================================================================
+   Wishlist Store — persisted to localStorage
+   ============================================================================ */
+
+const WISHLIST_KEY = 'gadgetbd_wishlist'
+
+interface WishlistStore {
+  ids: string[]
+  toggle: (productId: string) => void
+  has: (productId: string) => boolean
+  remove: (productId: string) => void
+  clear: () => void
+}
+
+export const useWishlistStore = create<WishlistStore>()(
+  persist(
+    (set, get) => ({
+      ids: [],
+      toggle: (productId: string) => {
+        const current = get().ids
+        if (current.includes(productId)) {
+          set({ ids: current.filter((id) => id !== productId) })
+        } else {
+          set({ ids: [...current, productId] })
+        }
+      },
+      has: (productId: string) => get().ids.includes(productId),
+      remove: (productId: string) => set({ ids: get().ids.filter((id) => id !== productId) }),
+      clear: () => set({ ids: [] }),
+    }),
+    { 
+      name: WISHLIST_KEY,
+      // Migrate from old raw-array format used before the Zustand store
+      migrate: (persisted: any) => {
+        // If persisted is a plain array (old format), wrap it
+        if (Array.isArray(persisted)) {
+          return { ids: persisted }
+        }
+        return persisted as WishlistStore
+      },
+      version: 1,
+    }
+  )
+)
+
+/* ============================================================================
    Search Store
    ============================================================================ */
 

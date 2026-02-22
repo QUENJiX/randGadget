@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingBag, Heart, Minus, Plus, Truck, Shield, RotateCcw, Star, ChevronDown } from 'lucide-react'
 import Image from 'next/image'
-import { useCartStore } from '@/lib/store'
+import { useCartStore, useWishlistStore } from '@/lib/store'
 import { formatPrice, calcDiscount, cn, productImageUrl, imageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
 import { fadeUp, staggerContainer, staggerItem } from '@/lib/animations'
 import type { Product, ProductVariant } from '@/lib/types'
@@ -18,6 +18,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
     product.variants?.[0] || null
   )
   const [quantity, setQuantity] = useState(1)
+  const toggleWishlist = useWishlistStore((s) => s.toggle)
+  const isWishlisted = useWishlistStore((s) => s.ids.includes(product.id))
   const [activeTab, setActiveTab] = useState<'specs' | 'description' | 'reviews'>('specs')
   const [activeImage, setActiveImage] = useState(0)
   const addItem = useCartStore((s) => s.addItem)
@@ -49,7 +51,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
             animate="visible"
           >
             {/* Main image */}
-            <div className="aspect-square bg-[var(--color-bg-alt)] rounded-2xl border border-[var(--color-border)]/40 overflow-hidden relative mb-4">
+            <div className="aspect-square bg-[var(--color-bg-alt)] rounded-lg border border-[var(--color-border)] overflow-hidden relative mb-3">
               {(() => {
                 const images = product.images ?? []
                 const src = images[activeImage]
@@ -92,10 +94,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
                   key={img?.id ?? i}
                   onClick={() => setActiveImage(i)}
                   className={cn(
-                    'w-20 h-20 rounded-xl bg-[var(--color-bg-alt)] border overflow-hidden relative transition-all',
+                    'w-16 h-16 rounded-md bg-[var(--color-bg-alt)] border overflow-hidden relative transition-all',
                     activeImage === i
                       ? 'border-[var(--color-accent)]'
-                      : 'border-[var(--color-border)]/40 hover:border-[var(--color-border)]'
+                      : 'border-[var(--color-border)] hover:border-[var(--color-text-tertiary)]'
                   )}
                 >
                   {img ? (
@@ -190,7 +192,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                       key={variant.id}
                       onClick={() => setSelectedVariant(variant)}
                       className={cn(
-                        'px-4 py-2 rounded-xl text-sm font-medium border transition-all',
+                        'px-3 py-1.5 rounded-md text-sm font-medium border transition-all',
                         selectedVariant?.id === variant.id
                           ? 'border-[var(--color-accent)] bg-[var(--color-accent-subtle)]'
                           : 'border-[var(--color-border)] hover:border-[var(--color-text-tertiary)]'
@@ -204,21 +206,21 @@ export function ProductDetail({ product }: ProductDetailProps) {
             )}
 
             {/* Quantity + Add to cart */}
-            <motion.div variants={staggerItem} className="flex items-center gap-4 mb-6">
-              <div className="flex items-center border border-[var(--color-border)] rounded-xl overflow-hidden">
+            <motion.div variants={staggerItem} className="flex items-center gap-3 mb-6">
+              <div className="flex items-center border border-[var(--color-border)] rounded-md overflow-hidden">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-3 hover:bg-[var(--color-surface)] transition-colors"
+                  className="p-2.5 hover:bg-[var(--color-surface)] transition-colors"
                   aria-label="Decrease quantity"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="w-12 text-center text-sm font-medium">
+                <span className="w-10 text-center text-sm font-medium">
                   {quantity}
                 </span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="p-3 hover:bg-[var(--color-surface)] transition-colors"
+                  className="p-2.5 hover:bg-[var(--color-surface)] transition-colors"
                   aria-label="Increase quantity"
                 >
                   <Plus className="w-4 h-4" />
@@ -228,17 +230,22 @@ export function ProductDetail({ product }: ProductDetailProps) {
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors shadow-[var(--shadow-sm)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingBag className="w-4 h-4" />
                 {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
               </button>
 
               <button
-                className="p-3.5 border border-[var(--color-border)] rounded-xl hover:bg-[var(--color-surface)] transition-colors"
-                aria-label="Add to wishlist"
+                onClick={() => toggleWishlist(product.id)}
+                className={`p-3 border rounded-lg transition-colors ${
+                  isWishlisted
+                    ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 text-red-500'
+                    : 'border-[var(--color-border)] hover:bg-[var(--color-surface)]'
+                }`}
+                aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
               >
-                <Heart className="w-5 h-5" />
+                <Heart className="w-5 h-5" fill={isWishlisted ? 'currentColor' : 'none'} />
               </button>
             </motion.div>
 

@@ -39,30 +39,29 @@ export function DealsStrip() {
         if (data) setDeals(data as DealProduct[])
       })
   }, [])
+
   return (
-    <section className="py-20 md:py-28 bg-gradient-to-br from-teal-600 to-emerald-700 dark:from-teal-900 dark:to-emerald-950 text-white">
+    <section className="py-16 md:py-20 bg-[var(--color-bg-alt)]">
       <div className="container-wide">
         <motion.div
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="flex items-end justify-between mb-12"
+          className="flex items-end justify-between mb-10"
         >
           <div>
-            <p className="text-xs font-medium opacity-60 uppercase tracking-[0.2em] mb-3">
+            <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-[0.15em] mb-2">
               Limited Time
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Today&apos;s top deals
-            </h2>
+            <h2>Today&apos;s top deals</h2>
           </div>
           <Link
             href="/deals"
-            className="hidden md:inline-flex items-center gap-2 text-sm font-medium opacity-80 hover:opacity-100 transition-opacity group"
+            className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)] hover:text-[var(--color-accent-hover)] transition-colors"
           >
             All deals
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </motion.div>
 
@@ -71,31 +70,30 @@ export function DealsStrip() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
         >
           {deals.map((deal) => {
             const discount = deal.compare_price
               ? Math.round(((deal.compare_price - deal.price) / deal.compare_price) * 100)
               : 0
-            const tag = deal.is_featured ? 'Featured' : 'Deal'
             return (
               <motion.div key={deal.id} variants={staggerItem}>
                 <Link
                   href={`/product/${deal.slug}`}
-                  className="group block p-6 rounded-2xl bg-white/[0.08] border border-white/[0.1] hover:bg-white/[0.12] hover:border-white/[0.2] transition-all"
+                  className="group block p-4 rounded-lg bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:shadow-[var(--shadow-md)] transition-shadow duration-200"
                 >
-                  {/* Tag */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider opacity-60">
-                      {tag}
+                  {/* Tag row */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-[var(--color-text-tertiary)]">
+                      {deal.is_featured ? 'Featured' : 'Deal'}
                     </span>
-                    <span className="px-2 py-0.5 bg-white/[0.15] rounded-md text-[11px] font-semibold">
+                    <span className="px-1.5 py-0.5 bg-[var(--color-error)] text-white rounded text-[10px] font-semibold">
                       -{discount}%
                     </span>
                   </div>
 
                   {/* Product image */}
-                  <div className="w-full aspect-square bg-white/[0.06] rounded-xl mb-4 overflow-hidden relative">
+                  <div className="w-full aspect-square bg-[var(--color-bg-alt)] rounded-md mb-3 overflow-hidden relative">
                     {(() => {
                       const src = productImageUrl(deal)
                       return src ? (
@@ -110,7 +108,7 @@ export function DealsStrip() {
                         />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="opacity-30">
+                          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-[var(--color-text-tertiary)]">
                             <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
                             <line x1="12" y1="18" x2="12.01" y2="18" />
                           </svg>
@@ -120,14 +118,14 @@ export function DealsStrip() {
                   </div>
 
                   {/* Info */}
-                  <p className="text-xs opacity-50 mb-1">{deal.brand?.name}</p>
-                  <h3 className="text-sm font-semibold mb-3 line-clamp-1 group-hover:opacity-90 transition-opacity">
+                  <p className="text-[11px] text-[var(--color-text-tertiary)] mb-0.5">{deal.brand?.name}</p>
+                  <h3 className="text-sm font-medium mb-2 line-clamp-1 group-hover:text-[var(--color-accent)] transition-colors">
                     {deal.name}
                   </h3>
 
                   <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold">{formatPrice(deal.price)}</span>
-                    <span className="text-sm opacity-50 line-through">
+                    <span className="text-base font-bold">{formatPrice(deal.price)}</span>
+                    <span className="text-sm text-[var(--color-text-tertiary)] line-through">
                       {formatPrice(deal.compare_price)}
                     </span>
                   </div>

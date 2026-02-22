@@ -2,64 +2,65 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowUpRight, Smartphone, Laptop, Headphones, Watch, Cable } from 'lucide-react'
-import { bentoItem, staggerContainer, staggerItem, fadeUp } from '@/lib/animations'
+import { ArrowRight, Smartphone, Laptop, Headphones, Watch, Cable } from 'lucide-react'
+import { bentoItem, fadeUp } from '@/lib/animations'
+import { CategoryIllustration } from './category-illustrations'
 
 interface BentoCard {
+  id: string
   title: string
   description: string
   href: string
   icon: React.ElementType
   className: string
-  accent: string
 }
 
 const bentoCards: BentoCard[] = [
   {
+    id: 'smartphones',
     title: 'Smartphones',
     description: 'Flagship phones from Apple, Samsung, Google, and more. Latest models with official warranty.',
     href: '/category/smartphones',
     icon: Smartphone,
     className: 'md:col-span-2 md:row-span-2',
-    accent: 'from-teal-50 to-emerald-50 dark:from-teal-950/40 dark:to-emerald-950/40',
   },
   {
+    id: 'laptops',
     title: 'Laptops',
     description: 'MacBooks, ThinkPads, and gaming powerhouses.',
     href: '/category/laptops',
     icon: Laptop,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-sky-50 to-cyan-50 dark:from-sky-950/40 dark:to-cyan-950/40',
   },
   {
+    id: 'audio',
     title: 'Audio',
     description: 'Premium earbuds, headphones, and speakers.',
     href: '/category/audio',
     icon: Headphones,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-violet-50 to-purple-50 dark:from-violet-950/40 dark:to-purple-950/40',
   },
   {
+    id: 'wearables',
     title: 'Wearables',
     description: 'Smartwatches and fitness trackers for every lifestyle.',
     href: '/category/wearables',
     icon: Watch,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/40',
   },
   {
+    id: 'accessories',
     title: 'Accessories',
     description: 'Chargers, cases, cables, and essential tech gear.',
     href: '/category/accessories',
     icon: Cable,
     className: 'md:col-span-1 md:row-span-1',
-    accent: 'from-rose-50 to-pink-50 dark:from-rose-950/40 dark:to-pink-950/40',
   },
 ]
 
 export function CategoryBento() {
   return (
-    <section className="py-20 md:py-28">
+    <section className="py-16 md:py-20">
       <div className="container-wide">
         {/* Section header */}
         <motion.div
@@ -67,51 +68,45 @@ export function CategoryBento() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
-          className="mb-12"
+          className="mb-10"
         >
-          <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-[0.2em] mb-3">
+          <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-[0.15em] mb-2">
             Browse by Category
           </p>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-            Find your next device
-          </h2>
+          <h2>Find your next device</h2>
         </motion.div>
 
         {/* Bento grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           {bentoCards.map((card, index) => (
             <motion.div
               key={card.title}
               variants={bentoItem(index)}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: '-80px' }}
+              viewport={{ once: true, margin: '-60px' }}
               className={card.className}
             >
               <Link
                 href={card.href}
-                className={`group relative block h-full min-h-[200px] md:min-h-[240px] p-8 rounded-2xl bg-gradient-to-br ${card.accent} border border-[var(--color-border)]/40 overflow-hidden transition-all hover:shadow-[var(--shadow-lg)] hover:border-[var(--color-border)]`}
+                className="group relative block h-full min-h-[180px] md:min-h-[220px] p-6 md:p-8 rounded-2xl bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-bg-alt)] border border-[var(--color-border)]/50 overflow-hidden transition-all duration-500 hover:shadow-[var(--shadow-lg)] hover:-translate-y-1"
               >
-                {/* Icon background */}
-                <div className="absolute bottom-0 right-0 opacity-[0.06] transform translate-x-4 translate-y-4">
-                  <card.icon className="w-40 h-40 md:w-56 md:h-56" strokeWidth={0.8} />
-                </div>
+                <CategoryIllustration type={card.id} />
 
-                {/* Content */}
-                <div className="relative z-10 h-full flex flex-col justify-between">
+                <div className="relative z-10 w-full md:w-2/3 h-full flex flex-col justify-between pointer-events-none">
                   <div>
-                    <div className="w-12 h-12 rounded-xl bg-[var(--color-bg-card)] border border-[var(--color-border)]/50 flex items-center justify-center mb-4 shadow-sm">
-                      <card.icon className="w-6 h-6" strokeWidth={1.5} />
+                    <div className="w-10 h-10 rounded-lg bg-[var(--color-bg-card)] border border-[var(--color-border)] flex items-center justify-center mb-3 group-hover:bg-[var(--color-accent)] group-hover:border-[var(--color-accent)] transition-colors duration-300">
+                      <card.icon className="w-5 h-5 text-[var(--color-text-secondary)] group-hover:text-[var(--color-bg)] transition-colors duration-300" strokeWidth={1.5} />
                     </div>
-                    <h3 className="text-xl font-semibold mb-2">{card.title}</h3>
+                    <h3 className="text-lg font-semibold mb-1">{card.title}</h3>
                     <p className="text-sm text-[var(--color-text-secondary)] max-w-xs leading-relaxed">
                       {card.description}
                     </p>
                   </div>
 
-                  <div className="mt-6 flex items-center gap-2 text-sm font-medium group-hover:gap-3 transition-all">
+                  <div className="mt-4 flex items-center gap-1.5 text-sm font-medium text-[var(--color-accent)] translate-y-0 group-hover:translate-x-1 transition-transform duration-300">
                     <span>Explore</span>
-                    <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:ml-1 transition-all duration-300" />
                   </div>
                 </div>
               </Link>

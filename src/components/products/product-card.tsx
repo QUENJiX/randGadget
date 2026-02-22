@@ -4,8 +4,9 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Heart, ShoppingBag } from 'lucide-react'
-import { cardHover, staggerItem } from '@/lib/animations'
+import { staggerItem } from '@/lib/animations'
 import { formatPrice, calcDiscount, productImageUrl, BLUR_PLACEHOLDER } from '@/lib/utils'
+import { useWishlistStore, useCartStore } from '@/lib/store'
 import type { Product } from '@/lib/types'
 
 interface ProductCardProps {
@@ -14,6 +15,11 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
+  const toggleWishlist = useWishlistStore((s) => s.toggle)
+  const isWishlisted = useWishlistStore((s) => s.ids.includes(product.id))
+  const addItem = useCartStore((s) => s.addItem)
+  const removeCartItem = useCartStore((s) => s.removeItem)
+  const isInCart = useCartStore((s) => s.items.some((i) => i.product_id === product.id))
   const discount = product.compare_price
     ? calcDiscount(product.price, product.compare_price)
     : 0
@@ -23,13 +29,9 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
       variants={staggerItem}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: '-50px' }}
+      viewport={{ once: true, margin: '-40px' }}
     >
-      <motion.div
-        initial="rest"
-        whileHover="hover"
-        className="group relative bg-[var(--color-bg-card)] border border-[var(--color-border)]/50 rounded-2xl overflow-hidden transition-shadow hover:shadow-[var(--shadow-lg)]"
-      >
+      <div className="group relative bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg overflow-hidden transition-shadow duration-200 hover:shadow-[var(--shadow-md)]">
         {/* Image */}
         <Link href={`/product/${product.slug}`} className="block">
           <div className="relative aspect-square bg-[var(--color-bg-alt)] overflow-hidden">
@@ -41,15 +43,15 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                   alt={product.name}
                   fill
                   sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover"
                   placeholder="blur"
                   blurDataURL={BLUR_PLACEHOLDER}
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-20 h-20 mx-auto mb-2 rounded-2xl bg-[var(--color-surface)] flex items-center justify-center">
-                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-text-tertiary)]">
+                    <div className="w-16 h-16 mx-auto mb-2 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-[var(--color-text-tertiary)]">
                         <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
                         <line x1="12" y1="18" x2="12.01" y2="18" />
                       </svg>
@@ -61,55 +63,64 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             })()}
 
             {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
               {discount > 0 && (
-                <span className="px-2 py-0.5 bg-[var(--color-error)] text-white text-[10px] font-semibold rounded-md">
+                <span className="px-1.5 py-0.5 bg-[var(--color-error)] text-white text-[10px] font-semibold rounded">
                   -{discount}%
                 </span>
               )}
               {product.is_featured && (
-                <span className="px-2 py-0.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-[10px] font-semibold rounded-md">
+                <span className="px-1.5 py-0.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] text-[10px] font-semibold rounded">
                   Featured
                 </span>
               )}
             </div>
 
-            {/* Quick actions */}
-            <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+            {/* Quick actions — appear on hover */}
+            <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
               <button
-                className="w-9 h-9 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl flex items-center justify-center shadow-sm hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-text)] hover:border-transparent transition-colors"
-                aria-label="Add to wishlist"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id) }}
+                className={`w-8 h-8 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-md flex items-center justify-center shadow-[var(--shadow-sm)] transition-colors ${
+                  isWishlisted
+                    ? 'text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30'
+                    : 'hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-text)] hover:border-transparent'
+                }`}
+                aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
               >
-                <Heart className="w-4 h-4" />
+                <Heart className="w-3.5 h-3.5" fill={isWishlisted ? 'currentColor' : 'none'} />
               </button>
               <button
-                className="w-9 h-9 bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-xl flex items-center justify-center shadow-sm hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-text)] hover:border-transparent transition-colors"
-                aria-label="Quick add to cart"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  if (isInCart) {
+                    removeCartItem(product.id)
+                  } else if (product.stock > 0) {
+                    addItem({ id: product.id, product_id: product.id, variant_id: null, quantity: 1, product })
+                  }
+                }}
+                className={`w-8 h-8 rounded-md flex items-center justify-center shadow-[var(--shadow-sm)] transition-colors ${
+                  isInCart
+                    ? 'bg-green-600 text-white border border-green-600'
+                    : 'bg-[var(--color-bg-card)] border border-[var(--color-border)] hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-text)] hover:border-transparent'
+                }`}
+                aria-label={isInCart ? 'Remove from cart' : 'Quick add to cart'}
               >
-                <ShoppingBag className="w-4 h-4" />
+                <ShoppingBag className="w-3.5 h-3.5" />
               </button>
             </div>
-
-            {/* Hover overlay */}
-            <motion.div
-              variants={{
-                rest: { opacity: 0 },
-                hover: { opacity: 1 },
-              }}
-              className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"
-            />
           </div>
         </Link>
 
         {/* Info */}
-        <div className="p-4">
+        <div className="p-3">
           <Link href={`/product/${product.slug}`}>
             {product.category?.name && (
-              <p className="text-[11px] font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider mb-1">
+              <p className="text-[10px] font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider mb-0.5">
                 {product.category.name}
               </p>
             )}
-            <h3 className="text-sm font-medium leading-snug mb-2 line-clamp-2 group-hover:text-[var(--color-accent)] transition-colors">
+            <h3 className="text-sm font-medium leading-snug mb-1.5 line-clamp-2 group-hover:text-[var(--color-accent)] transition-colors">
               {product.name}
             </h3>
           </Link>
@@ -127,17 +138,17 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
 
           {/* Stock indicator */}
           {product.stock <= 5 && product.stock > 0 && (
-            <p className="mt-2 text-[11px] text-[var(--color-warning)] font-medium">
-              Only {product.stock} left in stock
+            <p className="mt-1.5 text-[11px] text-[var(--color-warning)] font-medium">
+              Only {product.stock} left
             </p>
           )}
           {product.stock === 0 && (
-            <p className="mt-2 text-[11px] text-[var(--color-error)] font-medium">
+            <p className="mt-1.5 text-[11px] text-[var(--color-error)] font-medium">
               Out of stock
             </p>
           )}
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   )
 }

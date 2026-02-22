@@ -76,7 +76,7 @@ export function AuthForm() {
       >
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-[var(--color-accent)] rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-[var(--color-accent)] rounded-lg flex items-center justify-center">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[var(--color-accent-text)]">
                 <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                 <path d="M2 17l10 5 10-5"/>
@@ -94,9 +94,9 @@ export function AuthForm() {
           </p>
         </div>
 
-        <div className="p-8 rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-card)]">
+        <div className="p-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-card)] shadow-[var(--shadow-sm)]">
           {/* Mode toggle */}
-          <div className="flex gap-1 p-1 bg-[var(--color-surface)] rounded-xl mb-6">
+          <div className="flex gap-1 p-1 bg-[var(--color-surface)] rounded-lg mb-6">
             {(['login', 'register'] as const).map((m) => (
               <button
                 key={m}
@@ -114,12 +114,12 @@ export function AuthForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 text-sm text-red-700 dark:text-red-400">
                 {error}
               </div>
             )}
             {message && (
-              <div className="p-3 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-400">
+              <div className="p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-400">
                 {message}
               </div>
             )}
@@ -139,7 +139,7 @@ export function AuthForm() {
                       type="text"
                       name="full_name"
                       placeholder="Your full name"
-                      className="w-full pl-10 pr-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                     />
                   </div>
                 </div>
@@ -151,7 +151,7 @@ export function AuthForm() {
                       type="tel"
                       name="phone"
                       placeholder="01XXXXXXXXX"
-                      className="w-full pl-10 pr-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                      className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                     />
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export function AuthForm() {
                   name="email"
                   placeholder="you@email.com"
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                  className="w-full pl-10 pr-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                 />
               </div>
             </div>
@@ -181,7 +181,7 @@ export function AuthForm() {
                   name="password"
                   placeholder="Enter password"
                   required
-                  className="w-full pl-10 pr-12 py-3 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
+                  className="w-full pl-10 pr-12 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm outline-none focus:border-[var(--color-accent)] transition-colors"
                 />
                 <button
                   type="button"
@@ -211,7 +211,7 @@ export function AuthForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 py-3.5 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-xl text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-2 py-3 bg-[var(--color-accent)] text-[var(--color-accent-text)] rounded-lg text-sm font-semibold hover:bg-[var(--color-accent-hover)] transition-colors shadow-[var(--shadow-sm)] disabled:opacity-50"
             >
               {loading ? (
                 <span className="w-4 h-4 border-2 border-[var(--color-bg)]/30 border-t-[var(--color-bg)] rounded-full animate-spin" />
@@ -228,7 +228,7 @@ export function AuthForm() {
           <div className="mt-6 pt-5 border-t border-[var(--color-border)]">
             <Link
               href="/checkout"
-              className="w-full inline-flex items-center justify-center gap-2 py-3 border border-[var(--color-border)] rounded-xl text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 py-2.5 border border-[var(--color-border)] rounded-lg text-sm font-medium hover:bg-[var(--color-surface)] transition-colors"
             >
               Continue as Guest
               <ArrowRight className="w-4 h-4" />
