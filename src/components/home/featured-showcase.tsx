@@ -112,7 +112,7 @@ function FeaturedProductRow({
         } bg-[var(--color-bg-card)] border border-[var(--color-border)] rounded-lg overflow-hidden hover:shadow-[var(--shadow-md)] transition-shadow duration-200`}
       >
         {/* Image area */}
-        <div className="relative md:w-1/2 aspect-[4/3] md:aspect-auto bg-[var(--color-bg-alt)] overflow-hidden">
+        <div className="relative md:w-[45%] shrink-0 aspect-[4/3] bg-[var(--color-surface)] overflow-hidden">
           {(() => {
             const src = productImageUrl(product)
             return src ? (
@@ -120,21 +120,18 @@ function FeaturedProductRow({
                 src={src}
                 alt={product.name}
                 fill
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 45vw"
+                className="object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
                 placeholder="blur"
                 blurDataURL={BLUR_PLACEHOLDER}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-28 h-28 md:w-36 md:h-36 mx-auto rounded-xl bg-[var(--color-surface)] flex items-center justify-center">
-                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-[var(--color-text-tertiary)]">
-                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-                      <line x1="12" y1="18" x2="12.01" y2="18" />
-                    </svg>
-                  </div>
-                  <p className="mt-3 text-xs text-[var(--color-text-tertiary)]">{product.brand?.name}</p>
+                <div className="w-20 h-20 rounded-xl bg-[var(--color-bg-card)] flex items-center justify-center">
+                  <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="text-[var(--color-text-tertiary)]">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                    <line x1="12" y1="18" x2="12.01" y2="18" />
+                  </svg>
                 </div>
               </div>
             )
@@ -142,7 +139,7 @@ function FeaturedProductRow({
         </div>
 
         {/* Content */}
-        <div className="md:w-1/2 p-6 md:p-10 flex flex-col justify-center">
+        <div className="flex-1 p-6 md:p-10 flex flex-col justify-center">
           <p className="text-xs font-medium text-[var(--color-text-tertiary)] uppercase tracking-wider mb-2">
             {product.brand?.name}
           </p>
